@@ -75,9 +75,7 @@ jobs:
 
       - name: Export from Bitbucket Server
         working-directory: ./tools/bbs-exporter
-        run:
-          bundle exec exe/bbs-exporter -f repositories.txt -o
-          ${MIGRATION_GUID}.tar.gz
+        run: bbs-exporter -f repositories.txt -o ${MIGRATION_GUID}.tar.gz
 
       - name: Upload migration archive to GitHub Artifacts
         uses: actions/upload-artifact@v3
