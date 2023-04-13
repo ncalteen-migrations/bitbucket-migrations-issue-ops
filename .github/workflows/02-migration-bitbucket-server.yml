@@ -7,7 +7,7 @@ on:
 
 jobs:
   export:
-    if: contains(github.event.issue.labels.*.name, 'migration')
+    if: ${{ contains(github.event.*.labels.*.name, 'migration') }}
     # && contains(github.event.issue.labels.*.name, 'bitbucket-server')
     uses: ./.github/workflows/03-shared-bitbucket-server-export.yml
     with:
