@@ -70,7 +70,8 @@ jobs:
         run: chmod +x ./script/bootstrap && ./script/bootstrap
 
       - name: Output Bitbucket Server Exporter version
-        run: bbs-exporter --version
+        working-directory: ./tools/bbs-exporter
+        run: bundle exec exe/bbs-exporter --version
 
       - name: Export from Bitbucket Server
         run: bbs-exporter -f repositories.txt -o ${MIGRATION_GUID}.tar.gz
