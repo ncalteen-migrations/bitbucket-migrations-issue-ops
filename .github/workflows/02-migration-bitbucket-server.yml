@@ -10,7 +10,9 @@ jobs:
     if:
       contains(toJson(github.event.*.labels.*.name), 'migration') &&
       contains(toJson(github.event.issue.labels.*.name), 'bitbucket-server')
-    uses: ./.github/workflows/03-shared-bitbucket-server-export.yml
+    uses:
+      '${{ env.GITHUB_WORKSPACE
+      }}/.github/workflows/03-shared-bitbucket-server-export.yml'
     with:
       setup-ruby: true
     secrets:
@@ -19,7 +21,9 @@ jobs:
 
   import:
     needs: export
-    uses: ./.github/workflows/04-shared-github-enterprise-cloud-import.yml
+    uses:
+      '${{ env.GITHUB_WORKSPACE
+      }}/.github/workflows/04-shared-github-enterprise-cloud-import.yml'
     with:
       user-mappings-path: ../../user-mappings.csv
     secrets:

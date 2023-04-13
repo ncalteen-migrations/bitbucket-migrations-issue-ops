@@ -25,7 +25,7 @@ jobs:
         with:
           script: |
             const options = { targetOrganization: '${{ vars.GHEC_TARGET_ORGANIZATION }}' }
-            await require('./.github/scripts/prepare.js')({github, context, options})
+            await require('${{ env.GITHUB_WORKSPACE }}/.github/scripts/prepare.js')({github, context, options})
 
       - name: Post failure message
         if: ${{ failure() }}
