@@ -29,7 +29,7 @@ jobs:
         run: echo "${{ contains(toJson(github.event.*.labels.*.name), 'migration') && contains(toJson(github.event.issue.labels.*.name), 'bitbucket-server') }}"
 
   export:
-    if: ${{ contains(toJson(github.event.*.labels.*.name), 'migration') && contains(toJson(github.event.issue.labels.*.name), 'bitbucket-server') }}
+    if: ${{ contains(toJson(github.event.*.labels.*.name), 'migration') }} && ${{ contains(toJson(github.event.issue.labels.*.name), 'bitbucket-server') }}
     uses: ./.github/workflows/03-shared-bitbucket-server-export.yml
     with:
       setup-ruby: true
