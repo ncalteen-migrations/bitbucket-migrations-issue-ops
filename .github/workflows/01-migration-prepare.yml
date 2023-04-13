@@ -1,0 +1,44 @@
+name: Migration (Prepare)
+
+on:
+  issues:
+    types:
+      - opened
+      - edited
+
+jobs:
+  prepare:
+    name: Prepare Migration
+    runs-on: ubuntu-latest
+
+    if: |
+      github.event_name == 'issues' &&
+      (github.event.action == 'opened' || github.event.action == 'edited') &&
+      contains(github.event.issue.labels.*.name, 'migration')
+
+    steps:
+      - name: Check out scripts
+        uses: actions/checkout@v3
+
+      - name: Post prepare message
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const options = { targetOrganization: '${{ vars.GHEC_TARGET_ORGANIZATION }}' }
+            await require('./.github/scripts/prepare.js')({github, context, options})
+
+      - name: Post failure message
+        if: ${{ failure() }}
+        uses: actions/github-script@v6
+        with:
+          script: |
+            let commentBody
+
+            commentBody = `😢 The issue body could not be parsed. Please edit the issue body or open a new issue using an issue template.`
+
+            await github.rest.issues.createComment({
+              issue_number: ${{ github.event.issue.number }},
+              owner: '${{ github.REPOSITORY_OWNER }}',
+              repo: '${{ github.event.repository.name }}',
+              body: commentBody
+            })

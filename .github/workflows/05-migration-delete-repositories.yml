@@ -53,12 +53,13 @@ jobs:
 
       - name: Delete repositories
         run:
-          ghec-importer delete-imported --guid ${{ steps.migration-guid.outputs.result }} --yes
+          ghec-importer delete-imported --guid ${{
+          steps.migration-guid.outputs.result }} --yes
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GHEC_IMPORTER_ADMIN_TOKEN: ${{ secrets.GHEC_ADMIN_TOKEN }}
           GHEC_IMPORTER_TARGET_ORGANIZATION:
-            ${{ secrets.GHEC_TARGET_ORGANIZATION }}
+            ${{ vars.GHEC_TARGET_ORGANIZATION }}
           # Terminate process with non-zero exit code if file system operations
           # fail (https://nodejs.org/api/cli.html#cli_unhandled_rejections_mode)
           NODE_OPTIONS: --unhandled-rejections=strict

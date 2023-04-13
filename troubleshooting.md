@@ -8,7 +8,7 @@ Consider splitting the export by changing the workflows to perform the export in
 two steps, and then import each portion separately.
 
 1. Update
-   [`shared-bitbucket-server-export.yml`](.github/workflows/shared-bitbucket-server-export.yml)
+   [`03-shared-bitbucket-server-export.yml`](.github/workflows/03-shared-bitbucket-server-export.yml)
    to export the repositories and metadata separately.
 
    ```yaml
@@ -53,7 +53,7 @@ two steps, and then import each portion separately.
    ```
 
 2. Update
-   [`shared-github-enterprise-cloud-import.yml`](.github/workflows//shared-github-enterprise-cloud-import.yml)
+   [`04-shared-github-enterprise-cloud-import.yml`](.github/workflows/04-shared-github-enterprise-cloud-import.yml)
    to import the repositories and metadata separately.
 
    First, update the file to download both archives.
