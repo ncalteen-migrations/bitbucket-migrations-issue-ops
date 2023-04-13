@@ -10,7 +10,7 @@ on:
         default: true
         type: boolean
     secrets:
-      BITBUCKET_API_PRIVATE_TOKEN:
+      BITBUCKET_SERVER_API_TOKEN:
         required: true
       BITBUCKET_SERVER_URL:
         required: true
