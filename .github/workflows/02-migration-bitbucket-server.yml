@@ -6,6 +6,14 @@ on:
       - created
 
 jobs:
+  output:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Output GitHub Context
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"
+
   export:
     if: ${{ contains(github.event.*.labels.*.name, 'migration') }}
     # && contains(github.event.issue.labels.*.name, 'bitbucket-server')
