@@ -10,18 +10,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Output issue body
-        run: echo '${{ github.event.issue.body }}'
-      - name: Output issue labels
-        shell: python
-        run: |
-          labels = ${{ github.event.issue.labels }}
-          for label in labels:
-            print(label['name'])
+        run: echo '${{ github.event.issue }}'
 
   export:
-    if:
-      contains(github.event.issue.labels.*.name, 'migration') &&
-      contains(github.event.issue.labels.*.name, 'bitbucket-server')
+    if: contains(github.event.issue.labels.*.name, 'migration') && contains(github.event.issue.labels.*.name, 'bitbucket-server')
     uses: ./.github/workflows/shared-bitbucket-server-export.yml
     with:
       setup-ruby: true
