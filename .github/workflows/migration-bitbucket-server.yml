@@ -6,6 +6,14 @@ on:
       - opened
 
 jobs:
+  output:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Output issue body
+        run: echo '${{ github.event.issue.body }}'
+      - name: Output issue labels
+        run: echo '${{ github.event.issue.labels }}'
+
   export:
     if:
       contains(github.event.issue.labels.*.name, 'migration') &&
