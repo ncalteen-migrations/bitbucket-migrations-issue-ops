@@ -67,7 +67,9 @@ jobs:
 
       - name: Bootstrap Bitbucket Server exporter
         working-directory: ./tools/bbs-exporter
-        run: chmod +x ./script/bootstrap && ./script/bootstrap
+        run:
+          bundle update --bundler && chmod +x ./script/bootstrap &&
+          ./script/bootstrap
 
       - name: Output Bitbucket Server Exporter version
         run: bbs-exporter --version
