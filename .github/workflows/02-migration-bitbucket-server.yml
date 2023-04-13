@@ -21,6 +21,8 @@ jobs:
         env:
           NAMES: ${{ toJson(github.event.*.labels.*.name) }}
         run: echo "$NAMES"
+      - name: Output Test
+        run: echo "${{ contains(toJson(github.event.*.labels.*.name),'migration') }}"
 
   export:
     if: ${{ contains(github.event.*.labels.*.name, 'migration') }}
