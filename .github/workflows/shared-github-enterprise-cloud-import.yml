@@ -1,0 +1,136 @@
+name: Shared GitHub Enterprise Cloud Import
+
+on:
+  workflow_call:
+    inputs:
+      migration-guid:
+        default: migration-archive-${{ github.event.issue.number }}
+        type: string
+      user-mappings-path:
+        required: true
+        type: string
+      user-mappings-source-url:
+        required: true
+        type: string
+    secrets:
+      GHEC_ADMIN_TOKEN:
+        required: true
+      GHEC_TARGET_ORGANIZATION:
+        required: true
+
+jobs:
+  import:
+    name: Import
+    runs-on: ubuntu-latest
+
+    env:
+      MIGRATION_GUID: ${{ inputs.migration-guid }}
+
+    defaults:
+      run:
+        working-directory: ./tools/ghec-importer
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v3
+
+      - name: Set migration type
+        uses: actions/github-script@v6
+        id: migration-type
+        with:
+          result-encoding: string
+          script: |
+            return context.payload.comment.body.match('dry-run') ? 'Dry-run' : 'Production'
+
+      - name: Parse issue body
+        id: parse
+        uses: actions/github-script@v6
+        with:
+          script: |
+            require('./.github/scripts/parse-issue-body.js')({context, core})
+
+      - name: Download migration archive
+        uses: actions/download-artifact@v3
+        with:
+          name: ${{ env.MIGRATION_GUID }}.tar.gz
+
+      - name: Get users in migration archive
+        run: |
+          users=$(tar -zxf ../../${{ env.MIGRATION_GUID }}.tar.gz --wildcards './users_*.json' --to-stdout | jq -r '.[].login' | sort | uniq)
+          echo "source,target" > ../../subset-user-mappings.csv
+          for i in $users; do echo $i; grep $i"," ${{ inputs.user-mappings-path }} >> ../../subset-user-mappings.csv || echo "$i not found in user-mappings.csv"; done
+
+      - name: Log users in migration archive
+        run: cat ../../subset-user-mappings.csv
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+
+      # Avoid husky from running and failing (.git can't be found) by clearing prepare script
+      # npm set-script needs npm > v7, default is v6 with Node.js 14
+      - name: Install dependencies
+        run: |
+          npm install -g npm@8
+          npm set-script prepare ""
+          npm ci --omit=dev
+
+      - name: Link GHEC Importer
+        run: npm link
+
+      - name: Run import
+        id: import
+        run: ghec-importer import ../../${{ env.MIGRATION_GUID }}.tar.gz --debug
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GHEC_IMPORTER_ADMIN_TOKEN: ${{ secrets.GHEC_ADMIN_TOKEN }}
+          GHEC_IMPORTER_TARGET_ORGANIZATION:
+            ${{ secrets.GHEC_TARGET_ORGANIZATION }}
+          GHEC_IMPORTER_RESOLVE_REPOSITORY_RENAMES: guid-suffix
+          GHEC_IMPORTER_DISALLOW_TEAM_MERGES: true
+          GHEC_IMPORTER_USER_MAPPINGS_PATH: ../../subset-user-mappings.csv
+          GHEC_IMPORTER_USER_MAPPINGS_SOURCE_URL:
+            ${{ inputs.user-mappings-source-url }}
+          GHEC_IMPORTER_MAKE_INTERNAL:
+            ${{ steps.parse.outputs.target-visibility == 'Internal' }}
+          # Terminate process with non-zero exit code if file system operations
+          # fail (https://nodejs.org/api/cli.html#cli_unhandled_rejections_mode)
+          NODE_OPTIONS: --unhandled-rejections=strict
+
+      - if: ${{ failure() }}
+        name: Report failed migration
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const body = `:no_entry: **${{ steps.migration-type.outputs.result }} migration failed.** [View workflow run for details](${context.payload.repository.html_url}/actions/runs/${context.runId})`
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body
+            })
+
+      - if: ${{ success() }}
+        name: Add delete repository comment
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const migrationType = '${{ steps.migration-type.outputs.result }}'
+
+            if (migrationType === 'Dry-run') {
+              let body = `In order to delete the migrated repositories of the
+              dry-run, add a comment with the following slash command:
+
+              \`\`\`plain
+              /delete-repositories ${{ steps.import.outputs.migration-guid }}
+              \`\`\``
+
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body
+              })
+            }
