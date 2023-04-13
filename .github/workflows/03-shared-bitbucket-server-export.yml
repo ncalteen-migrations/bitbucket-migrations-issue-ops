@@ -63,7 +63,7 @@ jobs:
         if: ${{ inputs.setup-ruby }}
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 2.6.4
+          ruby-version: 2.4.1
 
       - name: Bootstrap Bitbucket Server exporter
         working-directory: ./tools/bbs-exporter
