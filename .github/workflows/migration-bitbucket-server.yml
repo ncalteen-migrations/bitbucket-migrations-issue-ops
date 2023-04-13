@@ -12,7 +12,11 @@ jobs:
       - name: Output issue body
         run: echo '${{ github.event.issue.body }}'
       - name: Output issue labels
-        run: echo '${{ github.event.issue.labels }}'
+        shell: python
+        run: |
+          labels = ${{ github.event.issue.labels }}
+          for label in labels:
+            print(label['name'])
 
   export:
     if:
