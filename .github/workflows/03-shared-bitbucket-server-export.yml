@@ -59,15 +59,17 @@ jobs:
       - name: Log repositories to migrate
         run: cat repositories.txt
 
-      #- name: Set up Ruby
-      #  if: ${{ inputs.setup-ruby }}
-      #  uses: ruby/setup-ruby@v1
-      #  with:
-      #    ruby-version: 2.6.4
+      - name: Set up Ruby
+        if: ${{ inputs.setup-ruby }}
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 2.6.4
 
       - name: Bootstrap Bitbucket Server exporter
         working-directory: ./tools/bbs-exporter
-        run: chmod +x ./script/bootstrap && ./script/bootstrap
+        run:
+          gem update --system 3.2.3 && chmod +x ./script/bootstrap &&
+          ./script/bootstrap
 
       - name: Output Bitbucket Server Exporter version
         run: bbs-exporter --version
