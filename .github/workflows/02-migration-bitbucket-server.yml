@@ -6,22 +6,8 @@ on:
       - created
 
 jobs:
-  output:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Output GitHub Context
-        env:
-          GITHUB_CONTEXT: ${{ toJson(github) }}
-        run: echo "$GITHUB_CONTEXT"
-      - name: Output Labels
-        env:
-          LABELS: ${{ toJson(github.event.issue.labels) }}
-        run: echo "$LABELS"
-
   export:
-    if: |
-      contains(github.event.issue.labels.*.name, 'migration') &&
-      contains(github.event.issue.labels.*.name, 'bitbucket-server')
+    if: contains(github.event.issue.labels.*.name, 'migration') && contains(github.event.issue.labels.*.name, 'bitbucket-server')
     uses: ./.github/workflows/03-shared-bitbucket-server-export.yml
     with:
       setup-ruby: true
