@@ -13,6 +13,14 @@ jobs:
         env:
           GITHUB_CONTEXT: ${{ toJson(github) }}
         run: echo "$GITHUB_CONTEXT"
+      - name: Output Labels Context
+        env:
+          LABELS: ${{ toJson(github.event.*.labels) }}
+        run: echo "$LABELS"
+      - name: Output Names Context
+        env:
+          NAMES: ${{ toJson(github.event.*.labels.*.names) }}
+        run: echo "$NAMES"
 
   export:
     if: ${{ contains(github.event.*.labels.*.name, 'migration') }}
