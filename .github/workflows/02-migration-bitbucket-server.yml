@@ -19,7 +19,7 @@ jobs:
         run: echo "$LABELS"
       - name: Output Names Context
         env:
-          NAMES: ${{ toJson(github.event.*.labels.*.names) }}
+          NAMES: ${{ toJson(github.event.*.labels.*.name) }}
         run: echo "$NAMES"
 
   export:
