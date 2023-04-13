@@ -63,19 +63,17 @@ jobs:
         if: ${{ inputs.setup-ruby }}
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 2.4.1
+          ruby-version: 2.6.4
 
       - name: Bootstrap Bitbucket Server exporter
         working-directory: ./tools/bbs-exporter
         run: chmod +x ./script/bootstrap && ./script/bootstrap
 
       - name: Output Bitbucket Server Exporter version
-        run: bundle exec bbs-exporter --version
+        run: bbs-exporter --version
 
       - name: Export from Bitbucket Server
-        run:
-          bundle exec bbs-exporter -f repositories.txt -o
-          ${MIGRATION_GUID}.tar.gz
+        run: bbs-exporter -f repositories.txt -o ${MIGRATION_GUID}.tar.gz
 
       - name: Upload migration archive to GitHub Artifacts
         uses: actions/upload-artifact@v3
