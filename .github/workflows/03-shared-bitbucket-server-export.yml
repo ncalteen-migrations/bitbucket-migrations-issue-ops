@@ -61,7 +61,7 @@ jobs:
 
       - name: Set up Ruby
         if: ${{ inputs.setup-ruby }}
-        uses: actions/setup-ruby@v1
+        uses: ruby/setup-ruby@v1
         with:
           ruby-version: 2.6.4
 
