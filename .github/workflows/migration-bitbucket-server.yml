@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Output issue body
-        run: echo '${{ github.event.issue }}'
+        run: echo '${{ github.event.issue.* }}'
 
   export:
     if: contains(github.event.issue.labels.*.name, 'migration') && contains(github.event.issue.labels.*.name, 'bitbucket-server')
