@@ -22,7 +22,8 @@ jobs:
 
     if:
       github.event_name == 'issue_comment' &&
-      startsWith(github.event.comment.body, '/run-migration')
+      (startsWith(github.event.comment.body, '/run-dry-run-migration') ||
+      startsWith(github.event.comment.body, '/run-production-migration'))
 
     env:
       MIGRATION_GUID: ${{ inputs.migration-guid }}
