@@ -9,11 +9,15 @@ jobs:
   output:
     runs-on: ubuntu-latest
     steps:
-      - name: Output issue body
-        run: echo '${{ github.event.issue.* }}'
+      - name: Output GitHub Context
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"
 
   export:
-    if: contains(github.event.issue.labels.*.name, 'migration') && contains(github.event.issue.labels.*.name, 'bitbucket-server')
+    if:
+      contains(github.event.issue.labels.*.name, 'migration') &&
+      contains(github.event.issue.labels.*.name, 'bitbucket-server')
     uses: ./.github/workflows/shared-bitbucket-server-export.yml
     with:
       setup-ruby: true
