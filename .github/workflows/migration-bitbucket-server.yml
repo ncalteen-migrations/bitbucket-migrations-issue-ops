@@ -16,8 +16,8 @@ jobs:
 
   export:
     if:
-      contains(github.event.issue.labels.*.name, 'migration') &&
-      contains(github.event.issue.labels.*.name, 'bitbucket-server')
+      contains(toJson(github.event.issue.labels.*.name), 'migration') &&
+      contains(toJson(github.event.issue.labels.*.name), 'bitbucket-server')
     uses: ./.github/workflows/shared-bitbucket-server-export.yml
     with:
       setup-ruby: true
