@@ -1,7 +1,7 @@
 module.exports = ({context, core}) => {
   const issueBody = context.payload.issue.body
   const parsedIssueBody = issueBody.match(
-    /### Repositories\s+```csv(?<repositories>[^`]+)```\s+### Target repository visibility\s+(?<targetRepositoryVisibility>Private|Internal)/,
+    /### Repositories\s+```CSV(?<repositories>[^`]+)```\s+### Target repository visibility\s+(?<targetRepositoryVisibility>Private|Internal)/,
   )
 
   if (parsedIssueBody) {
