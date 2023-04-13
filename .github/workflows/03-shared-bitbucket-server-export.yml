@@ -27,7 +27,7 @@ jobs:
 
     env:
       MIGRATION_GUID: ${{ inputs.migration-guid }}
-      BITBUCKET_API_PRIVATE_TOKEN: ${{ secrets.BITBUCKET_API_PRIVATE_TOKEN }}
+      BITBUCKET_SERVER_API_TOKEN: ${{ secrets.BITBUCKET_SERVER_API_TOKEN }}
       BITBUCKET_SERVER_URL: ${{ secrets.BITBUCKET_SERVER_URL }}
 
     steps:

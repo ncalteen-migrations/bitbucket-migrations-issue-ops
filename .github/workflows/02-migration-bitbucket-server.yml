@@ -14,7 +14,7 @@ jobs:
     with:
       setup-ruby: true
     secrets:
-      BITBUCKET_API_PRIVATE_TOKEN: ${{ secrets.BBS_ADMIN_TOKEN }}
+      BITBUCKET_SERVER_API_TOKEN: ${{ secrets.BBS_ADMIN_TOKEN }}
       BITBUCKET_SERVER_URL: ${{ vars.BBS_URL }}
 
   import:
