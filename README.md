@@ -13,12 +13,14 @@
 This migration utility has been tested for the following migration paths:
 
 1. Bitbucket Server v7.1.1 -> GitHub Enterprise Cloud (GHEC)
-2. Bitbucket Cloud -> GitHub Enterprise Cloud (GHEC)
+
+<!--2. Bitbucket Cloud -> GitHub Enterprise Cloud (GHEC)-->
 
 ## Considerations
 
-- When migrating from Bitbucket Cloud, only commit history is included. Other
-  metadata is not supported at this time.
+<!--- When migrating from Bitbucket Cloud, only commit history is included. Other
+  metadata is not supported at this time.-->
+
 - Migrating user-owned repositories is not supported. To migrate a user-owned
   repository, you must transfer it to a non-user owner before performing the
   migration.
@@ -47,12 +49,7 @@ repository with any changes to the file.
 
 1. Select the **Issues** tab.
 2. Select **New issue**.
-3. Select the appropriate issue template depending on the source you are
-   migrating from (Bitbucket Server vs. Bitbucket Cloud).
-
-   - [Migrate from Bitbucket Server](#todo)
-   - [Migrate from Bitbucket Cloud](#todo)
-
+3. Select the **Bitbucket Server to GitHub Enterprise Cloud** issue.
 4. In the **Repositories** text field, enter the list of repositories to migrate
    in the following format:
 
@@ -224,7 +221,7 @@ Working through the `gl-exporter` ruby runtime
 It's possible to build and push the [Dockerfile](/tools/gl-exporter/Dockerfile)
 to the repository and run as a container job:
 
-```
+```yaml
 jobs:
   export:
     name: Export
@@ -232,8 +229,8 @@ jobs:
     container:
       image: 'ghcr.io/${{ github.repository }}:latest'
       credentials:
-         username: ${{ github.ref }}
-         password: ${{ secrets.GITHUB_TOKEN }}
+        username: ${{ github.ref }}
+        password: ${{ secrets.GITHUB_TOKEN }}
 ```
 
 ### Note on Tools

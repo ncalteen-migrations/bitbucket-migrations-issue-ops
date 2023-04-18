@@ -9,7 +9,7 @@ jobs:
     name: Delete repositories
     runs-on: ubuntu-latest
 
-    if:
+    if: |
       github.event_name == 'issue_comment' &&
       startsWith(github.event.comment.body, '/delete-repositories')
 
@@ -60,6 +60,7 @@ jobs:
           GHEC_IMPORTER_ADMIN_TOKEN: ${{ secrets.GHEC_ADMIN_TOKEN }}
           GHEC_IMPORTER_TARGET_ORGANIZATION:
             ${{ vars.GHEC_TARGET_ORGANIZATION }}
+
           # Terminate process with non-zero exit code if file system operations
           # fail (https://nodejs.org/api/cli.html#cli_unhandled_rejections_mode)
           NODE_OPTIONS: --unhandled-rejections=strict

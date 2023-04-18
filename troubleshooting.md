@@ -14,7 +14,9 @@ two steps, and then import each portion separately.
    ```yaml
    # Replace this
    - name: Export from Bitbucket Server
-     run: bbs-exporter -f repositories.txt -o ${MIGRATION_GUID}.tar.gz
+     working-directory: ./tools/bbs-exporter
+     run: |
+       bbs-exporter -f ../../repositories.txt -o ../../${MIGRATION_GUID}.tar.gz
 
    - name: Upload migration archive to GitHub Artifacts
      uses: actions/upload-artifact@v3
@@ -26,14 +28,14 @@ two steps, and then import each portion separately.
 
    # With this
    - name: Export repositories from Bitbucket Server
-     run:
-       bbs-exporter --only repository --max-threads 25 --retries 5 -f
-       repositories.txt -o ${MIGRATION_GUID}_repos.tar.gz
+     working-directory: ./tools/bbs-exporter
+     run: |
+       bbs-exporter --only repository --max-threads 25 --retries 5 -f ../../repositories.txt -o ../../${MIGRATION_GUID}.tar.gz
 
    - name: Export metadata from Bitbucket Server
-     run:
-       bbs-exporter --except repository --max-threads 25 --retries 5 -f
-       repositories.txt -o ${MIGRATION_GUID}_meta.tar.gz
+     working-directory: ./tools/bbs-exporter
+     run: |
+       bbs-exporter --except repository --max-threads 25 --retries 5 -f ../../repositories.txt -o ../../${MIGRATION_GUID}.tar.gz
 
    - name: Upload repository migration archive to GitHub Artifacts
      uses: actions/upload-artifact@v3
@@ -96,6 +98,7 @@ two steps, and then import each portion separately.
          ${{ inputs.user-mappings-source-url }}
        GHEC_IMPORTER_MAKE_INTERNAL:
          ${{ steps.parse.outputs.target-visibility == 'Internal' }}
+
        # Terminate process with non-zero exit code if file system operations
        # fail (https://nodejs.org/api/cli.html#cli_unhandled_rejections_mode)
        NODE_OPTIONS: --unhandled-rejections=strict
@@ -117,6 +120,7 @@ two steps, and then import each portion separately.
          ${{ inputs.user-mappings-source-url }}
        GHEC_IMPORTER_MAKE_INTERNAL:
          ${{ steps.parse.outputs.target-visibility == 'Internal' }}
+
        # Terminate process with non-zero exit code if file system operations
        # fail (https://nodejs.org/api/cli.html#cli_unhandled_rejections_mode)
        NODE_OPTIONS: --unhandled-rejections=strict
@@ -137,6 +141,7 @@ two steps, and then import each portion separately.
          ${{ inputs.user-mappings-source-url }}
        GHEC_IMPORTER_MAKE_INTERNAL:
          ${{ steps.parse.outputs.target-visibility == 'Internal' }}
+
        # Terminate process with non-zero exit code if file system operations
        # fail (https://nodejs.org/api/cli.html#cli_unhandled_rejections_mode)
        NODE_OPTIONS: --unhandled-rejections=strict

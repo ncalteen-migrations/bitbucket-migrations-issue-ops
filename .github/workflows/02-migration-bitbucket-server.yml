@@ -7,7 +7,7 @@ on:
 
 jobs:
   export:
-    if:
+    if: |
       contains(toJson(github.event.*.labels.*.name), 'migration') &&
       contains(toJson(github.event.issue.labels.*.name), 'bitbucket-server')
     uses: ./.github/workflows/03-shared-bitbucket-server-export.yml
