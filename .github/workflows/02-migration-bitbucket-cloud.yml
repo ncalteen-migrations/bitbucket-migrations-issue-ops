@@ -13,6 +13,7 @@ jobs:
     uses: ./.github/workflows/03-shared-bitbucket-cloud-export.yml
     secrets:
       BITBUCKET_CLOUD_ADMIN_TOKEN: ${{ secrets.BITBUCKET_CLOUD_ADMIN_TOKEN }}
+      BITBUCKET_CLOUD_WORKSPACE: ${{ vars.BITBUCKET_CLOUD_WORKSPACE }}
 
   #import:
   #  needs: export

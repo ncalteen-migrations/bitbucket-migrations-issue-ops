@@ -9,6 +9,8 @@ on:
     secrets:
       BITBUCKET_CLOUD_ADMIN_TOKEN:
         required: true
+      BITBUCKET_CLOUD_WORKSPACE:
+        required: true
 
 jobs:
   export:

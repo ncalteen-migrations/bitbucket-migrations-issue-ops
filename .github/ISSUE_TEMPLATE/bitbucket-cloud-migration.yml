@@ -14,8 +14,8 @@ body:
         Bitbucket Cloud to GitHub Enterprise Cloud
       render: CSV
       placeholder: |
-        workspace,repo1
-        workspace,repo2
+        project0,repo1
+        project1,repo2
     validations:
       required: true
   - type: dropdown
