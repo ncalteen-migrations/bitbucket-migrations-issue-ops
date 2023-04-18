@@ -80,16 +80,7 @@ jobs:
 
       - name: Run import
         id: import
-        run:
-          ghec-importer import ../../${{ env.MIGRATION_GUID }}.tar.gz \
-            -a ${{ secrets.GHEC_ADMIN_TOKEN }} \
-            -t ${{ secrets.GHEC_TARGET_ORGANIZATION }} \
-            --resolve-repository-renames guid-suffix \
-            --disallow-team-merges \
-            -I ${{ steps.parse.outputs.target-visibility == 'Internal'}} \
-            -u ../../subset-user-mappings.csv \
-            -s ${{ secrets.BBS_USER_MAPPING_URL }} \
-            --debug
+        run: ghec-importer import ../../${{ env.MIGRATION_GUID }}.tar.gz --debug
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GHEC_IMPORTER_ADMIN_TOKEN: ${{ secrets.GHEC_ADMIN_TOKEN }}
@@ -102,6 +93,7 @@ jobs:
             ${{ secrets.BBS_USER_MAPPING_URL }}
           GHEC_IMPORTER_MAKE_INTERNAL:
             ${{ steps.parse.outputs.target-visibility == 'Internal' }}
+
           # Terminate process with non-zero exit code if file system operations
           # fail (https://nodejs.org/api/cli.html#cli_unhandled_rejections_mode)
           NODE_OPTIONS: --unhandled-rejections=strict
