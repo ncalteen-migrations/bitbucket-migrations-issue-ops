@@ -64,6 +64,7 @@ jobs:
       - name: Create empty repositories on GitHub
         uses: actions/github-script@v6
         with:
+          github-token: ${{ secrets.GHEC_ADMIN_TOKEN }}
           script: |
             const options = { targetOrganization: '${{ vars.GHEC_TARGET_ORGANIZATION }}' }
             await require('./.github/scripts/create-repos.js')({github, context, options})
