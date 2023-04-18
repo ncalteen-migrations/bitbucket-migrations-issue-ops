@@ -9,7 +9,7 @@
     "format:write": "prettier --write .",
     "lint:check": "eslint --format unix .",
     "lint:write": "eslint --format unix --fix .",
-    "prepare": "husky install",
+    "prepare": "",
     "test": "jest"
   },
   "lint-staged": {
