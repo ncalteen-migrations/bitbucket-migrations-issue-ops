@@ -65,14 +65,8 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
-            const fs = require('fs')
-            const repositories = fs.readFileSync('./repositories.txt', 'utf8').split('\n')
-
-            await github.rest.repos.createInOrg({
-              org: '${{ vars.GHEC_TARGET_ORGANIZATION }}',
-              name: ,
-              private: true
-            })
+            const options = { targetOrganization: '${{ vars.GHEC_TARGET_ORGANIZATION }}' }
+            await require('./.github/scripts/create-repos.js')({github, context, options})
 
       #- name: Clone from Bitbucket Cloud
       #  run: |
