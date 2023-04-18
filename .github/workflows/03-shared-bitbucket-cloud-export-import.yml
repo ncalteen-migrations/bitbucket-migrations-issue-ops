@@ -1,0 +1,128 @@
+name: Shared Bitbucket Cloud Export
+
+on:
+  workflow_call:
+    inputs:
+      migration-guid:
+        default: migration-archive-${{ github.event.issue.number }}
+        type: string
+    secrets:
+      BITBUCKET_CLOUD_ADMIN_TOKEN:
+        required: true
+
+jobs:
+  export:
+    name: Export
+    runs-on: ubuntu-latest
+
+    if: |
+      github.event_name == 'issue_comment' &&
+      (startsWith(github.event.comment.body, '/run-dry-run-migration') || startsWith(github.event.comment.body, '/run-production-migration'))
+
+    env:
+      MIGRATION_GUID: ${{ inputs.migration-guid }}
+      BITBUCKET_CLOUD_ADMIN_TOKEN: ${{ secrets.BITBUCKET_CLOUD_ADMIN_TOKEN }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v3
+
+      - name: Update issue with running status
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const body = `:hourglass_flowing_sand: Running migration. [View workflow run for details](${context.payload.repository.html_url}/actions/runs/${context.runId})`
+
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body
+            })
+
+      - name: Parse repositories from issue body
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs')
+            const parsedIssueBody = require('./.github/scripts/parse-issue-body.js')({context, core})
+
+            fs.writeFileSync('./repositories.txt', parsedIssueBody.repositories.trim())
+
+      - name: Log repositories to migrate
+        run: cat repositories.txt
+
+      - name: Check if repositories exist
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const options = { targetOrganization: '${{ vars.GHEC_TARGET_ORGANIZATION }}' }
+            await require('./.github/scripts/check-existing-repos.js')({github, context, options, core})
+
+      - name: Create empty repositories on GitHub
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs')
+            const repositories = fs.readFileSync('./repositories.txt', 'utf8').split('\n')
+
+            await github.rest.repos.createInOrg({
+              org: '${{ vars.GHEC_TARGET_ORGANIZATION }}',
+              name: ,
+              private: true
+            })
+
+      #- name: Clone from Bitbucket Cloud
+      #  run: |
+      #    mkdir -p ${{ env.MIGRATION_GUID }}
+      #    cd ${{ env.MIGRATION_GUID }}
+      #    git clone https://ncalteen-github-admin@bitbucket.org/ncalteen-github/repo0.git
+      #    git -c "http.extraHeader=Authorization: Bearer ${BITBUCKET_TOKEN}" clone --mirror "${BITBUCKET_URL}/scm/${BITBUCKET_ORG}/${BITBUCKET_REPO}.git"
+      #    ERROR_CODE=$?
+      #    if [ ${ERROR_CODE} -ne 0 ]; then
+      #      # Error
+      #      echo "ERROR! Failed to Clone repository:[/${BITBUCKET_URL}/scm/${BITBUCKET_ORG}/${BITBUCKET_REPO}.git]!"
+      #      echo "Please verify the URL is reachable, and update variables as needed..."
+      #      echo "[${CLONE_CMD}]"
+      #      CleanUp
+      #      exit 1
+      #    else
+      #      # Success
+      #      echo "Successfuly cloned repository:[${BITBUCKET_ORG}/${BITBUCKET_REPO}]"
+      #    fi
+
+      #- name: Update remote URL
+      #  uses: actions/upload-artifact@v3
+      #  with:
+      #    name: ${{ env.MIGRATION_GUID }}.tar.gz
+      #    path: ${{ github.workspace }}/${{ env.MIGRATION_GUID }}.tar.gz
+      #    if-no-files-found: error
+      #    retention-days: 1
+
+      #- if: ${{ failure() }}
+      #  name: Update issue with failed export
+      #  uses: actions/github-script@v6
+      #  with:
+      #    script: |
+      #      const body = `:no_entry: **Export failed.** [View workflow run for details](${context.payload.repository.html_url}/actions/runs/${context.runId})`
+
+      #      await github.rest.issues.createComment({
+      #        issue_number: context.issue.number,
+      #        owner: context.repo.owner,
+      #        repo: context.repo.repo,
+      #        body
+      #      })
+
+      #- if: ${{ success() }}
+      #  name: Update issue with successful export
+      #  uses: actions/github-script@v6
+      #  with:
+      #    script: |
+      #      const body = `:white_check_mark: **Export successful.** [View workflow run for details](${context.payload.repository.html_url}/actions/runs/${context.runId})`
+
+      #      await github.rest.issues.createComment({
+      #        issue_number: context.issue.number,
+      #        owner: context.repo.owner,
+      #        repo: context.repo.repo,
+      #        body
+      #      })
