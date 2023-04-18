@@ -12,7 +12,7 @@ module.exports = async ({github, context, options, core}) => {
         repo: repository.split(',')[1],
       })
       .catch(() => {
-        duplicates.push(repo)
+        duplicates.push(repository)
       })
   })
 
