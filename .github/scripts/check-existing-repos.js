@@ -1,9 +1,7 @@
 const fs = require('fs')
 
 module.exports = async ({github, context, options, core}) => {
-  const repositories = fs
-    .readFileSync('../repositories.txt', 'utf8')
-    .split('\n')
+  const repositories = fs.readFileSync('./repositories.txt', 'utf8').split('\n')
 
   let duplicates = []
 
