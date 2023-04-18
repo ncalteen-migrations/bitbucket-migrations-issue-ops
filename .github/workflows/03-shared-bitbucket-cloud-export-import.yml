@@ -11,6 +11,8 @@ on:
         required: true
       BITBUCKET_CLOUD_WORKSPACE:
         required: true
+      GHEC_ADMIN_TOKEN:
+        required: true
 
 jobs:
   export:
