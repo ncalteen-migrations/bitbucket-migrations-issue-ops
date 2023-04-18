@@ -55,9 +55,7 @@ jobs:
 
       - name: Get users in migration archive
         run: |
-          tar -zxf ../../${{ env.MIGRATION_GUID }}.tar.gz
-          ls -la
-          users=$(tar -zxf ../../${{ env.MIGRATION_GUID }}.tar.gz --wildcards './users_*.json' --to-stdout | jq -r '.[].login' | sort | uniq)
+          users=$(tar -zxf ../../${{ env.MIGRATION_GUID }}.tar.gz --wildcards 'users_*.json' --to-stdout | jq -r '.[].login' | sort | uniq)
           echo "source,target" > ../../subset-user-mappings.csv
           for i in $users; do echo $i; grep $i"," ${{ inputs.user-mappings-path }} >> ../../subset-user-mappings.csv || echo "$i not found in user-mappings.csv"; done
 
