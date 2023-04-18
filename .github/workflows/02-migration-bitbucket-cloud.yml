@@ -10,7 +10,7 @@ jobs:
     if: |
       contains(toJson(github.event.*.labels.*.name), 'migration') &&
       contains(toJson(github.event.issue.labels.*.name), 'bitbucket-cloud')
-    uses: ./.github/workflows/03-shared-bitbucket-cloud-export.yml
+    uses: ./.github/workflows/03-shared-bitbucket-cloud-export-import.yml
     secrets:
       BITBUCKET_CLOUD_ADMIN_TOKEN: ${{ secrets.BITBUCKET_CLOUD_ADMIN_TOKEN }}
       BITBUCKET_CLOUD_WORKSPACE: ${{ vars.BITBUCKET_CLOUD_WORKSPACE }}
