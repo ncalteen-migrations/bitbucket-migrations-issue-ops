@@ -14,12 +14,12 @@ jobs:
     secrets:
       BITBUCKET_CLOUD_ADMIN_TOKEN: ${{ secrets.BITBUCKET_CLOUD_ADMIN_TOKEN }}
 
-  import:
-    needs: export
-    uses: ./.github/workflows/04-shared-github-enterprise-cloud-import.yml
-    with:
-      user-mappings-path: ../../user-mappings.csv
-    secrets:
-      BITBUCKET_CLOUD_USER_MAPPING_URL: ${{ vars.BBS_URL }}/users/
-      GHEC_ADMIN_TOKEN: ${{ secrets.GHEC_ADMIN_TOKEN }}
-      GHEC_TARGET_ORGANIZATION: ${{ vars.GHEC_TARGET_ORGANIZATION }}
+  #import:
+  #  needs: export
+  #  uses: ./.github/workflows/04-shared-github-enterprise-cloud-import.yml
+  #  with:
+  #    user-mappings-path: ../../user-mappings.csv
+  #  secrets:
+  #    BITBUCKET_CLOUD_USER_MAPPING_URL: ${{ vars.BBS_URL }}/users/
+  #    GHEC_ADMIN_TOKEN: ${{ secrets.GHEC_ADMIN_TOKEN }}
+  #    GHEC_TARGET_ORGANIZATION: ${{ vars.GHEC_TARGET_ORGANIZATION }}
