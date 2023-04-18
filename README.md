@@ -19,6 +19,9 @@ This migration utility has been tested for the following migration paths:
 
 - When migrating from Bitbucket Cloud, only commit history is included. Other
   metadata is not supported at this time.
+- Migrating user-owned repositories is not supported. To migrate a user-owned
+  repository, you must transfer it to a non-user owner before performing the
+  migration.
 
 ## Step 1: Create a user mapping file
 
