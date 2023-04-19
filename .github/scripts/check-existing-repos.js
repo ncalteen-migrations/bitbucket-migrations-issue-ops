@@ -1,6 +1,4 @@
 module.exports = async ({github, context, core, options}) => {
-  const duplicates = []
-
   async function checkDuplicate(repository) {
     try {
       console.log(`Checking ${repository}...`)
@@ -16,30 +14,39 @@ module.exports = async ({github, context, core, options}) => {
     }
   }
 
-  console.log(options.repositories)
   const promises = options.repositories.map(checkDuplicate)
 
   Promise.all(promises).then(values => {
-    console.log(values)
-  })
+    const duplicates = []
 
-  /*if (duplicates.length !== 0) {
-    let commentBody = `:no_entry: **Validation failed.** One or more repositories already exist:
-
-    \`\`\`plain
-    ${duplicates.join('\n')}
-    \`\`\`
-
-    Please remove the duplicates from your issue body and try again.
-    `
-
-    await github.rest.issues.createComment({
-      issue_number: context.issue.number,
-      owner: context.repo.owner,
-      repo: context.repo.repo,
-      commentBody,
+    values.forEach((value, index) => {
+      if (value) {
+        duplicates.push(options.repositories[index])
+      }
     })
 
-    core.setFailed(`Validation failed. One or more repositories already exist.`)
-  }*/
+    if (duplicates.length !== 0) {
+      let commentBody = `:no_entry: **Validation failed.** One or more repositories already exist:
+
+      \`\`\`plain
+      ${duplicates.join('\n')}
+      \`\`\`
+
+      Please remove the duplicates from your issue body and try again.
+      `
+
+      github.rest.issues
+        .createComment({
+          issue_number: context.issue.number,
+          owner: context.repo.owner,
+          repo: context.repo.repo,
+          commentBody,
+        })
+        .then(() => {
+          core.setFailed(
+            `Validation failed. One or more repositories already exist.`,
+          )
+        })
+    }
+  })
 }
