@@ -48,6 +48,9 @@ jobs:
         with:
           script: |
             const fs = require('fs')
+            const options = {
+              targetOrganization: '${{ vars.GHEC_TARGET_ORGANIZATION }}'
+            }
             const parsedIssueBody = require('./.github/scripts/parse-issue-body.js')({github, context, core, options})
 
             fs.writeFileSync('./repositories.txt', parsedIssueBody.repositories.trim())
