@@ -15,15 +15,15 @@ module.exports = async ({github, context, options, core}) => {
         repo: repository.split(',')[1],
       })
       .then(() => {
-        console.log('Found')
         duplicates.push(repository)
       })
       .catch(error => {
-        console.log(JSON.stringify(error))
-        console.log('Not found')
         // Do nothing
       })
   })
+
+  console.log(duplicates)
+  console.log(duplicates.length)
 
   if (duplicates.length > 0) {
     let commentBody = `:no_entry: **Validation failed.** One or more repositories already exist:
