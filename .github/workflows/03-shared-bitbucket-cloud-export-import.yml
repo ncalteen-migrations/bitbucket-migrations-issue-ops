@@ -23,7 +23,6 @@ jobs:
 
     env:
       MIGRATION_GUID: ${{ inputs.migration-guid }}
-      BITBUCKET_CLOUD_ADMIN_TOKEN: ${{ secrets.BITBUCKET_CLOUD_ADMIN_TOKEN }}
 
     steps:
       - name: Check out repository
@@ -67,7 +66,6 @@ jobs:
               targetOrganization: '${{ vars.GHEC_TARGET_ORGANIZATION }}',
               repositories: ${{ steps.parse-issue-body.outputs.repositories-json }}
             }
-            console.log(options)
 
             await require('./.github/scripts/check-existing-repos.js')({github, context, core, options})
 
@@ -84,24 +82,33 @@ jobs:
 
             await require('./.github/scripts/create-repos.js')({github, context, core, options})
 
-      #- name: Clone from Bitbucket Cloud
-      #  run: |
-      #    mkdir -p ${{ env.MIGRATION_GUID }}
-      #    cd ${{ env.MIGRATION_GUID }}
-      #    git clone https://ncalteen-github-admin@bitbucket.org/ncalteen-github/repo0.git
-      #    git -c "http.extraHeader=Authorization: Bearer ${BITBUCKET_TOKEN}" clone --mirror "${BITBUCKET_URL}/scm/${BITBUCKET_ORG}/${BITBUCKET_REPO}.git"
-      #    ERROR_CODE=$?
-      #    if [ ${ERROR_CODE} -ne 0 ]; then
-      #      # Error
-      #      echo "ERROR! Failed to Clone repository:[/${BITBUCKET_URL}/scm/${BITBUCKET_ORG}/${BITBUCKET_REPO}.git]!"
-      #      echo "Please verify the URL is reachable, and update variables as needed..."
-      #      echo "[${CLONE_CMD}]"
-      #      CleanUp
-      #      exit 1
-      #    else
-      #      # Success
-      #      echo "Successfuly cloned repository:[${BITBUCKET_ORG}/${BITBUCKET_REPO}]"
-      #    fi
+      - name: Clone from Bitbucket Cloud
+        working-directory: /tmp
+        run: |
+          mkdir -p ${{ env.MIGRATION_GUID }}
+          cd ${{ env.MIGRATION_GUID }}
+
+          input="./repositories.txt"
+          while IFS= read -r line
+          do
+            echo "$line"
+          done < "$input"
+
+          # Clone repositories
+          #git clone https://x-token-auth:${{ secrets.BITBUCKET_CLOUD_ADMIN_TOKEN }}@bitbucket.org/${{ vars.BITBUCKET_CLOUD_WORKSPACE }}/repo0.git
+
+          #ERROR_CODE=$?
+          #if [ ${ERROR_CODE} -ne 0 ]; then
+          #  # Error
+          #  echo "ERROR! Failed to Clone repository:[/${BITBUCKET_URL}/scm/${BITBUCKET_ORG}/${BITBUCKET_REPO}.git]!"
+          #  echo "Please verify the URL is reachable, and update variables as needed..."
+          #  echo "[${CLONE_CMD}]"
+          #  CleanUp
+          #  exit 1
+          #else
+          #  # Success
+          #  echo "Successfuly cloned repository:[${BITBUCKET_ORG}/${BITBUCKET_REPO}]"
+          #fi
 
       #- name: Update remote URL
       #  uses: actions/upload-artifact@v3
