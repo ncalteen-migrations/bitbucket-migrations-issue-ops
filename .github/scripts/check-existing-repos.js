@@ -18,7 +18,8 @@ module.exports = async ({github, context, options, core}) => {
         console.log('Found')
         duplicates.push(repository)
       })
-      .catch(() => {
+      .catch(error => {
+        console.log(JSON.stringify(error))
         console.log('Not found')
         // Do nothing
       })
