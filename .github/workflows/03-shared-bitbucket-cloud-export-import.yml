@@ -86,6 +86,8 @@ jobs:
         run: |
           mkdir -p /tmp/${{ env.MIGRATION_GUID }}
 
+          cat "./repositories.txt"
+
           input="./repositories.txt"
           while IFS= read -r line
           do
