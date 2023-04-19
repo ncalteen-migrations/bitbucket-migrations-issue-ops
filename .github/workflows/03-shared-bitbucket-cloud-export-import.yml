@@ -83,10 +83,8 @@ jobs:
             await require('./.github/scripts/create-repos.js')({github, context, core, options})
 
       - name: Clone from Bitbucket Cloud
-        working-directory: /tmp
         run: |
-          mkdir -p ${{ env.MIGRATION_GUID }}
-          cd ${{ env.MIGRATION_GUID }}
+          mkdir -p /tmp/${{ env.MIGRATION_GUID }}
 
           input="./repositories.txt"
           while IFS= read -r line
@@ -95,6 +93,7 @@ jobs:
           done < "$input"
 
           # Clone repositories
+          # cd /tmp/${{ env.MIGRATION_GUID }}
           #git clone https://x-token-auth:${{ secrets.BITBUCKET_CLOUD_ADMIN_TOKEN }}@bitbucket.org/${{ vars.BITBUCKET_CLOUD_WORKSPACE }}/repo0.git
 
           #ERROR_CODE=$?
