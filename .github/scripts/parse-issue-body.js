@@ -4,6 +4,8 @@ module.exports = ({context, core}) => {
     /### Repositories\s+```CSV(?<repositories>[^`]+)```\s+### Target repository visibility\s+(?<targetRepositoryVisibility>Private|Internal)/,
   )
 
+  console.log(parsedIssueBody)
+
   if (parsedIssueBody) {
     const repositories = parsedIssueBody.groups.repositories.trim().split('\n')
 
