@@ -5,7 +5,9 @@ module.exports = ({github, context, core, options}) => {
   )
 
   if (parsedIssueBody) {
-    const repositories = parsedIssueBody.groups.repositories.trim().split('\n')
+    const repositories = parsedIssueBody.groups.repositories
+      .trim()
+      .split(/[\r\n]+/)
 
     core.setOutput('repositories-json', JSON.stringify(repositories))
     core.setOutput('repositories', parsedIssueBody.groups.repositories)
