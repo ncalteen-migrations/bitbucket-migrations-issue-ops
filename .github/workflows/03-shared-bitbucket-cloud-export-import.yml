@@ -86,7 +86,8 @@ jobs:
         run: |
           mkdir -p /tmp/${{ env.MIGRATION_GUID }}
 
-          cat "./repositories.txt" | while read line;
+          # Group cat and echo to avoid missing newline at the end
+          { cat "./repositories.txt"; echo; } | while read line;
           do
             echo "Cloning $line"
           done
