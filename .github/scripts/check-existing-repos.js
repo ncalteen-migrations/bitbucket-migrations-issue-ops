@@ -1,4 +1,4 @@
-module.exports = async ({github, context, options, core}) => {
+module.exports = async ({github, context, core, options}) => {
   const duplicates = []
 
   async function checkDuplicate(repository) {

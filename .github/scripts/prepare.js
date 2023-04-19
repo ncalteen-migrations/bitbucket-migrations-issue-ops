@@ -1,7 +1,10 @@
 const parseIssueBody = require('./parse-issue-body.js')
 
-module.exports = async ({github, context, options}) => {
-  const {repositories, targetRepositoryVisibility} = parseIssueBody({context})
+module.exports = async ({github, context, core, options}) => {
+  const {repositories, targetRepositoryVisibility} = parseIssueBody({
+    context,
+    core,
+  })
 
   let commentBody
 

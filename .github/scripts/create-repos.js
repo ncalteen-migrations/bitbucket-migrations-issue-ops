@@ -1,6 +1,6 @@
 const fs = require('fs')
 
-module.exports = async ({github, context, options}) => {
+module.exports = async ({github, context, core, options}) => {
   const repositories = fs.readFileSync('./repositories.txt', 'utf8').split('\n')
 
   repositories.forEach(async repository => {

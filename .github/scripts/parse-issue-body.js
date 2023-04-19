@@ -1,4 +1,4 @@
-module.exports = ({context, core}) => {
+module.exports = ({github, context, core, options}) => {
   const issueBody = context.payload.issue.body
   const parsedIssueBody = issueBody.match(
     /### Repositories[\r\n]+```CSV[\r\n]+(?<repositories>[^`]+)```[\r\n]+### Target repository visibility[\r\n]+(?<targetRepositoryVisibility>Private|Internal)/,
