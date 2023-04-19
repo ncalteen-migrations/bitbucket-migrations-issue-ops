@@ -1,7 +1,7 @@
 const fs = require('fs')
 
 module.exports = async ({github, context, options, core}) => {
-  let duplicates = []
+  const duplicates = []
 
   options.repositories.forEach(repository => {
     console.log(
@@ -14,8 +14,9 @@ module.exports = async ({github, context, options, core}) => {
         owner: options.targetOrganization,
         repo: repository.split(',')[1],
       })
-      .then(() => {
+      .then(response => {
         duplicates.push(repository)
+        console.log(duplicates)
       })
       .catch(error => {
         // Do nothing
