@@ -64,8 +64,6 @@ jobs:
               repositories: ${{ steps.parse-issue-body.outputs.repositories-json }}
             }
 
-            console.log(options)
-
             await require('./.github/scripts/check-existing-repos.js')({github, context, options, core})
 
       - name: Create empty repositories on GitHub

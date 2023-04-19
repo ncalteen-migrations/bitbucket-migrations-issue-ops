@@ -4,13 +4,23 @@ module.exports = async ({github, context, options, core}) => {
   let duplicates = []
 
   options.repositories.forEach(repository => {
+    console.log(
+      `Checking if ${options.targetOrganization}/${
+        repository.split(',')[1]
+      } exists...`,
+    )
     github.rest.repos
       .get({
         owner: options.targetOrganization,
         repo: repository.split(',')[1],
       })
       .then(() => {
+        console.log('Found')
         duplicates.push(repository)
+      })
+      .catch(() => {
+        console.log('Not found')
+        // Do nothing
       })
   })
 
