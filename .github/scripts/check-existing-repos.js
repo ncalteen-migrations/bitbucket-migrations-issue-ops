@@ -1,20 +1,20 @@
 module.exports = async ({github, context, options, core}) => {
   const duplicates = []
 
-  options.repositories.forEach(async repository => {
-    try {
-      await github.rest.repos.get({
-        owner: options.targetOrganization,
-        repo: repository.split(',')[1],
-      })
+  const promises = options.repositories.map(repository => {
+    github.rest.repos.get({
+      owner: options.targetOrganization,
+      repo: repository.split(',')[1],
+    })
 
-      duplicates.push(repository)
-    } catch (error) {
-      // Do nothing
-    }
+    duplicates.push(repository)
   })
 
-  if (duplicates.length !== 0) {
+  Promise.all(promises).then(values => {
+    console.log(values)
+  })
+
+  /*if (duplicates.length !== 0) {
     let commentBody = `:no_entry: **Validation failed.** One or more repositories already exist:
 
     \`\`\`plain
@@ -32,5 +32,5 @@ module.exports = async ({github, context, options, core}) => {
     })
 
     core.setFailed(`Validation failed. One or more repositories already exist.`)
-  }
+  }*/
 }
