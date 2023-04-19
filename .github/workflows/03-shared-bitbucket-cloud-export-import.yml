@@ -58,6 +58,7 @@ jobs:
       - name: Check if repositories exist
         uses: actions/github-script@v6
         with:
+          github-token: ${{ secrets.GHEC_ADMIN_TOKEN }}
           script: |
             const options = {
               targetOrganization: '${{ vars.GHEC_TARGET_ORGANIZATION }}',
@@ -76,8 +77,6 @@ jobs:
               targetRepositoryVisibility: '${{ steps.parse-issue-body.outputs.target-visibility }}',
               repositories: ${{ steps.parse-issue-body.outputs.repositories-json }}
             }
-
-            console.log(options)
 
             await require('./.github/scripts/create-repos.js')({github, context, options})
 
