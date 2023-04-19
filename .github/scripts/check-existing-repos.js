@@ -16,6 +16,7 @@ module.exports = async ({github, context, core, options}) => {
     }
   }
 
+  console.log(options.repositories)
   const promises = options.repositories.map(checkDuplicate)
 
   Promise.all(promises).then(values => {
