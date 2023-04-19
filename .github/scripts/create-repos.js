@@ -7,9 +7,7 @@ module.exports = async ({github, context, options}) => {
     await github.rest.repos.createInOrg({
       org: options.targetOrganization,
       name: repository.split(',')[1],
-      private: true,
+      private: options.visibility === 'Private' ? true : false,
     })
   })
-
-  // TODO: Change visibility of repo based on input in issue (read issue body)
 }

@@ -1,17 +1,15 @@
 const fs = require('fs')
 
 module.exports = async ({github, context, options, core}) => {
-  const repositories = fs.readFileSync('./repositories.txt', 'utf8').split('\n')
-
   let duplicates = []
 
-  repositories.forEach(repository => {
+  options.repositories.forEach(repository => {
     github.rest.repos
       .get({
         owner: options.targetOrganization,
         repo: repository.split(',')[1],
       })
-      .catch(() => {
+      .then(() => {
         duplicates.push(repository)
       })
   })

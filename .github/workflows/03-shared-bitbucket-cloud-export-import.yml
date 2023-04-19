@@ -9,8 +9,6 @@ on:
     secrets:
       BITBUCKET_CLOUD_ADMIN_TOKEN:
         required: true
-      BITBUCKET_CLOUD_WORKSPACE:
-        required: true
       GHEC_ADMIN_TOKEN:
         required: true
 
@@ -45,6 +43,7 @@ jobs:
             })
 
       - name: Parse repositories from issue body
+        id: parse-issue-body
         uses: actions/github-script@v6
         with:
           script: |
@@ -53,6 +52,8 @@ jobs:
 
             fs.writeFileSync('./repositories.txt', parsedIssueBody.repositories.trim())
 
+            return parsedIssueBody
+
       - name: Log repositories to migrate
         run: cat repositories.txt
 
@@ -60,7 +61,10 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
-            const options = { targetOrganization: '${{ vars.GHEC_TARGET_ORGANIZATION }}' }
+            const options = {
+              targetOrganization: '${{ vars.GHEC_TARGET_ORGANIZATION }}'
+            }
+
             await require('./.github/scripts/check-existing-repos.js')({github, context, options, core})
 
       - name: Create empty repositories on GitHub
@@ -68,7 +72,14 @@ jobs:
         with:
           github-token: ${{ secrets.GHEC_ADMIN_TOKEN }}
           script: |
-            const options = { targetOrganization: '${{ vars.GHEC_TARGET_ORGANIZATION }}' }
+            const options = {
+              targetOrganization: '${{ vars.GHEC_TARGET_ORGANIZATION }}',
+              targetRepositoryVisibility: '${{ steps.parse-issue-body.outputs.targetRepositoryVisibility }}',
+              repositories: ${{ steps.parse-issue-body.outputs.repositories }}
+            }
+
+            console.log(options)
+
             await require('./.github/scripts/create-repos.js')({github, context, options})
 
       #- name: Clone from Bitbucket Cloud
