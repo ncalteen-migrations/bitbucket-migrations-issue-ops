@@ -63,7 +63,7 @@ jobs:
           script: |
             const options = {
               targetOrganization: '${{ vars.GHEC_TARGET_ORGANIZATION }}',
-              repositories: ${{ steps.parse-issue-body.outputs.repositories }}
+              repositories: ${{ steps.parse-issue-body.outputs.repositories-json }}
             }
 
             console.log(options)
@@ -77,8 +77,8 @@ jobs:
           script: |
             const options = {
               targetOrganization: '${{ vars.GHEC_TARGET_ORGANIZATION }}',
-              targetRepositoryVisibility: '${{ steps.parse-issue-body.outputs.targetRepositoryVisibility }}',
-              repositories: ${{ steps.parse-issue-body.outputs.repositories }}
+              targetRepositoryVisibility: '${{ steps.parse-issue-body.outputs.target-visibility }}',
+              repositories: ${{ steps.parse-issue-body.outputs.repositories-json }}
             }
 
             console.log(options)
