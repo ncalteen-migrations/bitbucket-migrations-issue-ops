@@ -62,8 +62,11 @@ jobs:
         with:
           script: |
             const options = {
-              targetOrganization: '${{ vars.GHEC_TARGET_ORGANIZATION }}'
+              targetOrganization: '${{ vars.GHEC_TARGET_ORGANIZATION }}',
+              repositories: ${{ steps.parse-issue-body.outputs.repositories }}
             }
+
+            console.log(options)
 
             await require('./.github/scripts/check-existing-repos.js')({github, context, options, core})
 
