@@ -7,8 +7,10 @@ module.exports = async ({github, context, options, core}) => {
         owner: options.targetOrganization,
         repo: repository.split(',')[1],
       })
-    } catch (error) {
+
       duplicates.push(repository)
+    } catch (error) {
+      // Do nothing
     }
   })
 
