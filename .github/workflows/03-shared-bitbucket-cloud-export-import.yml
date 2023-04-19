@@ -82,32 +82,32 @@ jobs:
 
             await require('./.github/scripts/create-repos.js')({github, context, core, options})
 
-      - name: Clone from Bitbucket Cloud
+      - name: Clone from Bitbucket Cloud and push to GitHub Enterprise Cloud
+        id: clone-and-push
         run: |
-          mkdir -p /tmp/${{ env.MIGRATION_GUID }}
-
           # Group cat and echo to avoid missing newline at the end
+          # Otherwise the last line in repositories.txt is ignored
           { cat "./repositories.txt"; echo; } | while read line;
           do
-            echo "Cloning $line"
+            # Strip project name
+            repo=${line#*,}
+
+            echo "Cloning $repo..."
+
+            # Clone repository
+            mkdir -p /tmp/${{ env.MIGRATION_GUID }}
+            git clone "https://x-token-auth:${{ secrets.BITBUCKET_CLOUD_ADMIN_TOKEN }}@bitbucket.org/${{ vars.BITBUCKET_CLOUD_WORKSPACE }}/$repo.git" "/tmp/${{ env.MIGRATION_GUID }}/$repo"
+
+            # Check for errors
+            ERROR_CODE=$?
+            if [ ${ERROR_CODE} -ne 0 ]; then
+              echo "::error::Failed to clone repository: $repo"
+              echo "step=clone" >> $GITHUB_OUTPUT
+              exit 1
+            else
+              echo "::debug::Successfuly cloned repository"
+            fi
           done
-
-          # Clone repositories
-          # cd /tmp/${{ env.MIGRATION_GUID }}
-          #git clone https://x-token-auth:${{ secrets.BITBUCKET_CLOUD_ADMIN_TOKEN }}@bitbucket.org/${{ vars.BITBUCKET_CLOUD_WORKSPACE }}/repo0.git
-
-          #ERROR_CODE=$?
-          #if [ ${ERROR_CODE} -ne 0 ]; then
-          #  # Error
-          #  echo "ERROR! Failed to Clone repository:[/${BITBUCKET_URL}/scm/${BITBUCKET_ORG}/${BITBUCKET_REPO}.git]!"
-          #  echo "Please verify the URL is reachable, and update variables as needed..."
-          #  echo "[${CLONE_CMD}]"
-          #  CleanUp
-          #  exit 1
-          #else
-          #  # Success
-          #  echo "Successfuly cloned repository:[${BITBUCKET_ORG}/${BITBUCKET_REPO}]"
-          #fi
 
       #- name: Update remote URL
       #  uses: actions/upload-artifact@v3
