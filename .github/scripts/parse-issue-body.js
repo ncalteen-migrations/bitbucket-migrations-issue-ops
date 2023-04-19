@@ -5,7 +5,7 @@ module.exports = ({context, core}) => {
   )
 
   if (parsedIssueBody) {
-    const repositories = lines(parsedIssueBody.groups.repositories.trim())
+    const repositories = parsedIssueBody.groups.repositories.trim().split('\n')
 
     core.setOutput('repositories-json', JSON.stringify(repositories))
     core.setOutput('repositories', parsedIssueBody.groups.repositories)
