@@ -5,27 +5,14 @@ module.exports = ({context, core}) => {
   )
 
   if (parsedIssueBody) {
-    if (core) {
-      const repos = parsedIssueBody.groups.repositories
-        .trim()
-        .split(/\s+/)
-        .map(function (entry) {
-          const parts = entry.split('/')
-          return {
-            url: entry,
-            name: parts[parts.length - 1],
-            org: parts[parts.length - 2],
-            host: parts[2],
-          }
-        })
+    const repositories = lines(parsedIssueBody.groups.repositories.trim())
 
-      core.setOutput('repositories-json', JSON.stringify(repos))
-      core.setOutput('repositories', parsedIssueBody.groups.repositories)
-      core.setOutput(
-        'target-visibility',
-        parsedIssueBody.groups.targetRepositoryVisibility,
-      )
-    }
+    core.setOutput('repositories-json', JSON.stringify(repositories))
+    core.setOutput('repositories', parsedIssueBody.groups.repositories)
+    core.setOutput(
+      'target-visibility',
+      parsedIssueBody.groups.targetRepositoryVisibility,
+    )
 
     return parsedIssueBody.groups
   }

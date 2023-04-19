@@ -52,6 +52,7 @@ jobs:
 
             fs.writeFileSync('./repositories.txt', parsedIssueBody.repositories.trim())
 
+            console.log(parsedIssueBody)
             return parsedIssueBody
 
       - name: Log repositories to migrate
