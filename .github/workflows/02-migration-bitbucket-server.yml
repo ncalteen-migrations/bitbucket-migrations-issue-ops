@@ -23,7 +23,7 @@ jobs:
     env:
       MIGRATION_GUID: migration-archive-${{ github.event.issue.number }}
       BITBUCKET_SERVER_API_TOKEN: ${{ secrets.BITBUCKET_SERVER_API_TOKEN }}
-      BITBUCKET_SERVER_URL: ${{ secrets.BITBUCKET_SERVER_URL }}
+      BITBUCKET_SERVER_URL: ${{ vars.BITBUCKET_SERVER_URL }}
 
     steps:
       - name: Check out repository
