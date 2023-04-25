@@ -66,6 +66,34 @@ jobs:
           # fail (https://nodejs.org/api/cli.html#cli_unhandled_rejections_mode)
           NODE_OPTIONS: --unhandled-rejections=strict
 
+      - if: ${{ failure() }}
+        name: Report failed deletion
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const body = `:no_entry: **Repository deletion failed.** [View workflow run for details](${context.payload.repository.html_url}/actions/runs/${context.runId})`
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body
+            })
+
+      - if: ${{ success() }}
+        name: Add success comment
+        uses: actions/github-script@v6
+        with:
+          script: |
+            let body = 'Repositories deleted successfully!'
+
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body
+            })
+
   delete-bitbucket-cloud:
     name: Delete repositories migrated from Bitbucket Cloud
     runs-on: ubuntu-latest
@@ -105,3 +133,31 @@ jobs:
             }
 
             await deleteRepos({github, context, core, options})
+
+      - if: ${{ failure() }}
+        name: Report failed deletion
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const body = `:no_entry: **Repository deletion failed.** [View workflow run for details](${context.payload.repository.html_url}/actions/runs/${context.runId})`
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body
+            })
+
+      - if: ${{ success() }}
+        name: Add success comment
+        uses: actions/github-script@v6
+        with:
+          script: |
+            let body = 'Repositories deleted successfully!'
+
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body
+            })
