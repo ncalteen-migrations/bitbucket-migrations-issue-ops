@@ -140,10 +140,11 @@ jobs:
           github-token: ${{ secrets.GHEC_ADMIN_TOKEN }}
           script: |
             const cloneRepos = require('./.github/scripts/clone-repos.js')
+            const fs = require('fs')
 
             const options = {
               targetOrganization: '${{ vars.GHEC_TARGET_ORGANIZATION }}',
-              repositories: repositories,
+              repositories: fs.readFileSync('./repositories.txt', 'utf8').split(/[\r\n]+/),
               temp: '${{ runner.temp }}'
             }
 
