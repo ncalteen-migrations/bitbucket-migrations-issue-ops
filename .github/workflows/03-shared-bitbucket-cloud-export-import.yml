@@ -96,7 +96,7 @@ jobs:
             const repositories = fs.readFileSync('./repositories.txt', 'utf8').split('\n')
 
             console.log('-----------------')
-            console.log('-'.join(repositories))
+            console.log(repositories.join('-'))
             console.log('-----------------')
 
             const options = {
