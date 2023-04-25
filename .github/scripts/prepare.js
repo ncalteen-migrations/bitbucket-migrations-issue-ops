@@ -8,12 +8,8 @@ module.exports = async ({github, context, core, options}) => {
 
   let body
 
-  console.log(repositories)
-  console.log(targetRepositoryVisibility)
   if (repositories && targetRepositoryVisibility) {
-    repositories = repositories.trim().split(/[\r\n]+/)
-
-    console.log(repositories)
+    //repositories = repositories.trim().split(/[\r\n]+/)
 
     body = `👋 Thank you for opening this migration issue!
   
