@@ -6,11 +6,12 @@ module.exports = async ({github, context, core, options, exec}) => {
   let sourceRepositoryUrl
   let repo
 
-  // Create a temporary directory to clone the source repositories
-  await exec.exec(`mkdir ${options.temp}/repository`)
+  console.log(options.repositories)
 
   options.repositories.forEach(repository => {
     repo = repository.split(',')
+    console.log(repository)
+    console.log(repo)
     sourceRepositoryUrl = `https://x-token-auth:${process.env.BITBUCKET_CLOUD_ADMIN_TOKEN}@bitbucket.org/${process.env.BITBUCKET_CLOUD_WORKSPACE}/${repo}.git`
     targetRepositoryUrl = `https://${process.env.GHEC_ADMIN_TOKEN}@github.com/${options.targetOrganization}/${repo}.git`
 
