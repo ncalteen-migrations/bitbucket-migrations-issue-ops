@@ -2,20 +2,19 @@ module.exports = async ({github, context, core, options}) => {
   async function checkDuplicate(repository) {
     try {
       core.info(`Checking ${repository}...`)
-      core.info(repository.split(',')[1])
+
       await github.rest.repos.get({
         owner: options.targetOrganization,
         repo: repository.split(',')[1],
       })
 
       core.info(`Repository ${repository} already exists!`)
+
       return true
     } catch (error) {
       return false
     }
   }
-
-  console.log(options.repositories)
 
   const promises = options.repositories.map(checkDuplicate)
 
