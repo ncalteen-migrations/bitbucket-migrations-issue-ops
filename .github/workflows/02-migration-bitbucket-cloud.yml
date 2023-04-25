@@ -6,11 +6,159 @@ on:
       - created
 
 jobs:
-  migrate:
+  export:
+    name: Export
+    runs-on: ubuntu-latest
+
+    # Only run when the following are true:
+    #   - `bitbucket-cloud` label present
+    #   - `migration` label present
+    #   - `/run-dry-run-migration` or `/run-production-migration` comment added
     if: |
       contains(toJson(github.event.*.labels.*.name), 'migration') &&
-      contains(toJson(github.event.issue.labels.*.name), 'bitbucket-cloud')
-    uses: ./.github/workflows/03-shared-bitbucket-cloud-export-import.yml
-    secrets:
-      BITBUCKET_CLOUD_ADMIN_TOKEN: ${{ secrets.BITBUCKET_CLOUD_ADMIN_TOKEN }}
-      GHEC_ADMIN_TOKEN: ${{ secrets.GHEC_ADMIN_TOKEN }}
+      contains(toJson(github.event.issue.labels.*.name), 'bitbucket-cloud') &&
+      github.event_name == 'issue_comment' &&
+      (startsWith(github.event.comment.body, '/run-dry-run-migration') || startsWith(github.event.comment.body, '/run-production-migration'))
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v3
+
+      - name: Update issue with running status
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const body = `:hourglass_flowing_sand: Running migration. [View workflow run for details](${context.payload.repository.html_url}/actions/runs/${context.runId})`
+
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body
+            })
+
+      - name: Parse repositories from issue body
+        id: parse-issue-body
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs')
+            const options = {
+              targetOrganization: '${{ vars.GHEC_TARGET_ORGANIZATION }}'
+            }
+            const parsedIssueBody = require('./.github/scripts/parse-issue-body.js')({github, context, core, options})
+
+            fs.writeFileSync('./repositories.txt', parsedIssueBody.repositories.trim())
+
+      - name: Log repositories to migrate
+        run: cat repositories.txt
+
+      - name: Check if repositories exist
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GHEC_ADMIN_TOKEN }}
+          script: |
+            const options = {
+              targetOrganization: '${{ vars.GHEC_TARGET_ORGANIZATION }}',
+              repositories: ${{ steps.parse-issue-body.outputs.repositories-json }}
+            }
+
+            await require('./.github/scripts/check-existing-repos.js')({github, context, core, options})
+
+      - name: Upload repositories artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: repositories
+          path: repositories.txt
+
+      - if: ${{ failure() }}
+        name: Update issue with failed migration
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const body = `:no_entry: **Migration failed.** [View workflow run for details](${context.payload.repository.html_url}/actions/runs/${context.runId})`
+
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body
+            })
+
+  import:
+    name: Import
+    needs: export
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v3
+
+      - name: Download repository list
+        uses: actions/download-artifact@v2
+        with:
+          name: repositories
+          path: .
+
+      - name: Create empty repositories on GitHub Enterprise Cloud
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GHEC_ADMIN_TOKEN }}
+          script: |
+            const fs = require('fs')
+            const repositories = fs.readFileSync('./repositories.txt', 'utf8').split('\n')
+
+            const options = {
+              targetOrganization: '${{ vars.GHEC_TARGET_ORGANIZATION }}',
+              targetRepositoryVisibility: '${{ steps.parse-issue-body.outputs.target-visibility }}',
+              repositories: repositories
+            }
+
+            await require('./.github/scripts/create-repos.js')({github, context, core, options})
+
+      - name: Clone from Bitbucket Cloud and push to GitHub Enterprise Cloud
+        id: clone-and-push
+        uses: actions/github-script@v6
+        env:
+          BITBUCKET_CLOUD_WORKSPACE: ${{ vars.BITBUCKET_CLOUD_WORKSPACE }}
+          BITBUCKET_CLOUD_ADMIN_TOKEN:
+            ${{ secrets.BITBUCKET_CLOUD_ADMIN_TOKEN }}
+          GHEC_ADMIN_TOKEN: ${{ secrets.GHEC_ADMIN_TOKEN }}
+        with:
+          github-token: ${{ secrets.GHEC_ADMIN_TOKEN }}
+          script: |
+            const options = {
+              targetOrganization: '${{ vars.GHEC_TARGET_ORGANIZATION }}',
+              repositories: repositories,
+              temp: '${{ runner.temp }}'
+            }
+
+            await require('./.github/scripts/clone-repos.js')({github, context, core, options, exec})
+
+      - if: ${{ failure() }}
+        name: Update issue with failed migration
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const body = `:no_entry: **Migration failed.** [View workflow run for details](${context.payload.repository.html_url}/actions/runs/${context.runId})`
+
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body
+            })
+
+      - if: ${{ success() }}
+        name: Update issue with successful migration
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const body = `:white_check_mark: **Migration successful.** [View workflow run for details](${context.payload.repository.html_url}/actions/runs/${context.runId})`
+
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body
+            })
