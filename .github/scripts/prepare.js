@@ -9,10 +9,11 @@ module.exports = async ({github, context, core, options}) => {
   let commentBody
 
   if (repositories && targetRepositoryVisibility) {
+    repositories = repositories.trim().split('\n')
+
     commentBody = `👋 Thank you for opening this migration issue!
   
-    The following **${repositories.trim().split('\n').length} repositories**
-    have been parsed from your issue body:
+    The following **${repositories.length} repositories** have been parsed from your issue body:
   
     \`\`\`plain
     ${repositories}
@@ -20,27 +21,23 @@ module.exports = async ({github, context, core, options}) => {
   
     The **target organization** is set to: **\`${options.targetOrganization}\`**
 
-    The **target repository visibility** is set to:
-    **\`${targetRepositoryVisibility}\`**
+    The **target repository visibility** is set to: **\`${targetRepositoryVisibility}\`**
   
     <details>
       <summary>
         <b>Troubleshooting</b>
       </summary>
   
-      If the parsed repositories do not match the repositories listed in your
-      issue body, you can edit the issue body and make sure it's correct.
+      If the parsed repositories do not match the repositories listed in your issue body, you can edit the issue body and make sure it's correct.
     </details>
   
     ## Run the migration
   
-    Add a comment to this issue with one of the following two commands in order
-    to run a migration:
+    Add a comment to this issue with one of the following two commands in order to run a migration:
   
     **Dry-run**
   
-    We recommend to do a "dry-run" migration first which **will not lock your
-    source repository**. Users may continue working on the repository.
+    We recommend to do a "dry-run" migration first which **will not lock your source repository**. Users may continue working on the repository.
   
     \`\`\`plain
     /run-dry-run-migration
@@ -48,18 +45,14 @@ module.exports = async ({github, context, core, options}) => {
   
     **Production**
   
-    After you have verified your "dry-run" migration and after you have
-    announced the production migration to your users, add a comment with the
-    following command to start the production migration. It **will lock your
-    source repository** and make it unaccessible for your users.
+    After you have verified your "dry-run" migration and after you have announced the production migration to your users, add a comment with the following command to start the production migration. It **will lock your source repository** and make it unaccessible for your users.
   
     \`\`\`plain
     /run-production-migration
     \`\`\`
     `
   } else {
-    commentBody = `😢 The issue body could not be parsed. Please edit the issue
-      body or open a new issue using an issue template.`
+    commentBody = `😢 The issue body could not be parsed. Please edit the issue body or open a new issue using an issue template.`
   }
 
   await github.rest.issues.createComment({

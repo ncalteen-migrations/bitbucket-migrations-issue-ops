@@ -1,4 +1,4 @@
-name: Shared Bitbucket Cloud Export
+name: Bitbucket Cloud Export
 
 on:
   workflow_call:
@@ -69,15 +69,40 @@ jobs:
 
             await require('./.github/scripts/check-existing-repos.js')({github, context, core, options})
 
+      - name: Upload repositories artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: repositories
+          path: repositories.txt
+
+  import:
+    name: Import
+    needs: export
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download repository list
+        uses: actions/download-artifact@v2
+        with:
+          name: repositories
+          path: .
+
       - name: Create empty repositories on GitHub
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.GHEC_ADMIN_TOKEN }}
           script: |
+            const fs = require('fs')
+            const repositories = fs.readFileSync('./repositories.txt', 'utf8').split('\n')
+
+            console.log('-----------------')
+            console.log('-'.join(repositories))
+            console.log('-----------------')
+
             const options = {
               targetOrganization: '${{ vars.GHEC_TARGET_ORGANIZATION }}',
               targetRepositoryVisibility: '${{ steps.parse-issue-body.outputs.target-visibility }}',
-              repositories: ${{ steps.parse-issue-body.outputs.repositories-json }}
+              repositories: repositories
             }
 
             await require('./.github/scripts/create-repos.js')({github, context, core, options})
