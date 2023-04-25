@@ -133,8 +133,7 @@ jobs:
         uses: actions/github-script@v6
         env:
           BITBUCKET_CLOUD_WORKSPACE: ${{ vars.BITBUCKET_CLOUD_WORKSPACE }}
-          BITBUCKET_CLOUD_ADMIN_TOKEN:
-            ${{ secrets.BITBUCKET_CLOUD_ADMIN_TOKEN }}
+          BITBUCKET_CLOUD_API_TOKEN: ${{ secrets.BITBUCKET_CLOUD_API_TOKEN }}
           GHEC_ADMIN_TOKEN: ${{ secrets.GHEC_ADMIN_TOKEN }}
         with:
           github-token: ${{ secrets.GHEC_ADMIN_TOKEN }}

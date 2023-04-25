@@ -4,23 +4,17 @@
 > migration issue ops. For setup/administration of this repository, refer to the
 > [ADMIN_README.md](./ADMIN_README.md).
 
-<!-- TODO Items
-1. Determine if this will handle BB Cloud and BB Server
---->
-
 ## Overview
 
 This migration utility has been tested for the following migration paths:
 
 1. Bitbucket Server v7.1.1 -> GitHub Enterprise Cloud (GHEC)
-
-<!--2. Bitbucket Cloud -> GitHub Enterprise Cloud (GHEC)-->
+2. Bitbucket Cloud -> GitHub Enterprise Cloud (GHEC)
 
 ## Considerations
 
-<!--- When migrating from Bitbucket Cloud, only commit history is included. Other
-  metadata is not supported at this time.-->
-
+- When migrating from Bitbucket Cloud, only commit history is included. Other
+  metadata is not supported at this time.
 - Migrating user-owned repositories is not supported. To migrate a user-owned
   repository, you must transfer it to a non-user owner before performing the
   migration.
@@ -49,7 +43,9 @@ repository with any changes to the file.
 
 1. Select the **Issues** tab.
 2. Select **New issue**.
-3. Select the **Bitbucket Server to GitHub Enterprise Cloud** issue.
+3. Select one of the following issue templates:
+   - **Bitbucket Server** to GitHub Enterprise Cloud
+   - **Bitbucket Cloud** to GitHub Enterprise Cloud
 4. In the **Repositories** text field, enter the list of repositories to migrate
    in the following format:
 
@@ -58,14 +54,14 @@ repository with any changes to the file.
    PROJECT_2_KEY,repo_2_name
    ```
 
-   > **Note**: You can specify multiple repositories in one issue.
+   > **Note**: Make sure to include the project **key**, not the project name.
 
 5. In the **Target repository visibility** drop-down menu, select **Private** or
    **Internal**. This will set the visibility of the repository once it is
-   migrated to GitHub.
+   migrated to GitHub. If not selected, this will default to **Private**.
 
 Once the issue is created, GitHub Actions will validate the input and add a
-comment to the issue summarizing the migration that will take place.
+comment to the issue with instructions on how to perform the migration.
 
 ## Step 3: Perform a dry-run migration
 
@@ -102,12 +98,9 @@ starting the production migration. This can be done by adding a comment to the
 migration issue.
 
 1. Open the migration issue you created previously.
-2. Add the following comment, replacing `MIGRATION_GUID` with the migration ID
-   added to the issue comments:
-
-   ```plain
-   /delete-repositories MIGRATION_GUID
-   ```
+2. Add the following comment:
+   - **Bitbucket Server:** `/delete-repositories MIGRATION_GUID`
+   - **Bitbucket Cloud:** `/delete-repositories`
 
 ## Step 5: Perform the production migration
 
