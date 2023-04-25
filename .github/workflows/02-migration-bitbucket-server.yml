@@ -74,7 +74,7 @@ jobs:
         run: |
           bbs-exporter -f ../../repositories.txt -o ../../${{ env.MIGRATION_GUID }}.tar.gz
 
-      - name: Upload migration archive artifact
+      - name: Upload migration archive
         uses: actions/upload-artifact@v3
         with:
           name: ${{ env.MIGRATION_GUID }}.tar.gz

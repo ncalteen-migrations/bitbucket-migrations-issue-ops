@@ -8,7 +8,7 @@ Consider splitting the export by changing the workflows to perform the export in
 two steps, and then import each portion separately.
 
 1. Update
-   [`03-shared-bitbucket-server-export.yml`](.github/workflows/03-shared-bitbucket-server-export.yml)
+   [`02-migration-bitbucket-server.yml`](.github/workflows/02-migration-bitbucket-server.yml)
    to export the repositories and metadata separately.
 
    ```yaml
@@ -18,7 +18,7 @@ two steps, and then import each portion separately.
      run: |
        bbs-exporter -f ../../repositories.txt -o ../../${MIGRATION_GUID}.tar.gz
 
-   - name: Upload migration archive to GitHub Artifacts
+   - name: Upload migration archive
      uses: actions/upload-artifact@v3
      with:
        name: ${{ env.MIGRATION_GUID }}.tar.gz
@@ -37,7 +37,7 @@ two steps, and then import each portion separately.
      run: |
        bbs-exporter --except repository --max-threads 25 --retries 5 -f ../../repositories.txt -o ../../${MIGRATION_GUID}.tar.gz
 
-   - name: Upload repository migration archive to GitHub Artifacts
+   - name: Upload repository archive
      uses: actions/upload-artifact@v3
      with:
        name: ${{ env.MIGRATION_GUID }}_repos.tar.gz
@@ -45,7 +45,7 @@ two steps, and then import each portion separately.
        if-no-files-found: error
        retention-days: 1
 
-   - name: Upload metadata migration archive to GitHub Artifacts
+   - name: Upload metadata archive
      uses: actions/upload-artifact@v3
      with:
        name: ${{ env.MIGRATION_GUID }}_meta.tar.gz
@@ -55,7 +55,7 @@ two steps, and then import each portion separately.
    ```
 
 2. Update
-   [`04-shared-github-enterprise-cloud-import.yml`](.github/workflows/04-shared-github-enterprise-cloud-import.yml)
+   [`02-migration-bitbucket-server.yml`](.github/workflows/02-migration-bitbucket-server.yml)
    to import the repositories and metadata separately.
 
    First, update the file to download both archives.
@@ -68,12 +68,12 @@ two steps, and then import each portion separately.
        name: ${{ env.MIGRATION_GUID }}.tar.gz
 
    # With this
-   - name: Download migration archive
+   - name: Download repository archive
      uses: actions/download-artifact@v3
      with:
        name: ${{ env.MIGRATION_GUID }}_repos.tar.gz
 
-   - name: Download migration archive
+   - name: Download metadata archive
      uses: actions/download-artifact@v3
      with:
        name: ${{ env.MIGRATION_GUID }}_meta.tar.gz
@@ -94,8 +94,7 @@ two steps, and then import each portion separately.
        GHEC_IMPORTER_RESOLVE_REPOSITORY_RENAMES: guid-suffix
        GHEC_IMPORTER_DISALLOW_TEAM_MERGES: true
        GHEC_IMPORTER_USER_MAPPINGS_PATH: ../../subset-user-mappings.csv
-       GHEC_IMPORTER_USER_MAPPINGS_SOURCE_URL:
-         ${{ inputs.user-mappings-source-url }}
+       GHEC_IMPORTER_USER_MAPPINGS_SOURCE_URL: ${{ env.BBS_USER_MAPPING_URL }}
        GHEC_IMPORTER_MAKE_INTERNAL:
          ${{ steps.parse.outputs.target-visibility == 'Internal' }}
 
@@ -116,8 +115,7 @@ two steps, and then import each portion separately.
        GHEC_IMPORTER_RESOLVE_REPOSITORY_RENAMES: guid-suffix
        GHEC_IMPORTER_DISALLOW_TEAM_MERGES: true
        GHEC_IMPORTER_USER_MAPPINGS_PATH: ../../subset-user-mappings.csv
-       GHEC_IMPORTER_USER_MAPPINGS_SOURCE_URL:
-         ${{ inputs.user-mappings-source-url }}
+       GHEC_IMPORTER_USER_MAPPINGS_SOURCE_URL: ${{ env.BBS_USER_MAPPING_URL }}
        GHEC_IMPORTER_MAKE_INTERNAL:
          ${{ steps.parse.outputs.target-visibility == 'Internal' }}
 
@@ -137,8 +135,7 @@ two steps, and then import each portion separately.
        GHEC_IMPORTER_RESOLVE_REPOSITORY_RENAMES: guid-suffix
        GHEC_IMPORTER_DISALLOW_TEAM_MERGES: true
        GHEC_IMPORTER_USER_MAPPINGS_PATH: ../../subset-user-mappings.csv
-       GHEC_IMPORTER_USER_MAPPINGS_SOURCE_URL:
-         ${{ inputs.user-mappings-source-url }}
+       GHEC_IMPORTER_USER_MAPPINGS_SOURCE_URL: ${{ env.BBS_USER_MAPPING_URL }}
        GHEC_IMPORTER_MAKE_INTERNAL:
          ${{ steps.parse.outputs.target-visibility == 'Internal' }}
 
