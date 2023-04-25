@@ -23,11 +23,11 @@ Create the following secrets in the repository that is hosting this utility. See
 [Creating encrypted secrets for a repository](https://docs.github.com/en/actions/security-guides/encrypted-secrets#creating-encrypted-secrets-for-a-repository)
 for instructions.
 
-| Secret                        | Description                                                                                |
-| ----------------------------- | ------------------------------------------------------------------------------------------ |
-| `GHEC_ADMIN_TOKEN`            | Personal access token with admin permissions in the target GitHub Enterprise organization. |
-| `BITBUCKET_SERVER_API_TOKEN`  | Bitbucket Server HTTP access token with project and repository admin permissions.          |
-| `BITBUCKET_CLOUD_ADMIN_TOKEN` | Bitbucket Cloud HTTP access token with project and repository admin permissions.           |
+| Secret                       | Description                                                                                |
+| ---------------------------- | ------------------------------------------------------------------------------------------ |
+| `GHEC_ADMIN_TOKEN`           | Personal access token with admin permissions in the target GitHub Enterprise organization. |
+| `BITBUCKET_SERVER_API_TOKEN` | Bitbucket Server HTTP access token with project and repository admin permissions.          |
+| `BITBUCKET_CLOUD_API_TOKEN`  | Bitbucket Cloud HTTP access token with project and repository admin permissions.           |
 
 ### Variables
 
