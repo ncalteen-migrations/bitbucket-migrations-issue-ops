@@ -43,10 +43,12 @@ jobs:
         with:
           script: |
             const fs = require('fs')
+            const parse = require('./.github/scripts/parse-issue-body.js')
+
             const options = {
               targetOrganization: '${{ vars.GHEC_TARGET_ORGANIZATION }}'
             }
-            const parsedIssueBody = require('./.github/scripts/parse-issue-body.js')({github, context, core, options})
+            const parsedIssueBody = parse({github, context, core, options})
 
             fs.writeFileSync('./repositories.txt', parsedIssueBody.repositories.trim())
 
@@ -58,12 +60,13 @@ jobs:
         with:
           github-token: ${{ secrets.GHEC_ADMIN_TOKEN }}
           script: |
+            const checkExistingRepos = require('./.github/scripts/check-existing-repos.js')
             const options = {
               targetOrganization: '${{ vars.GHEC_TARGET_ORGANIZATION }}',
               repositories: ${{ steps.parse-issue-body.outputs.repositories-json }}
             }
 
-            await require('./.github/scripts/check-existing-repos.js')({github, context, core, options})
+            await checkExistingRepos({github, context, core, options})
 
       - name: Upload repositories artifact
         uses: actions/upload-artifact@v3
@@ -105,16 +108,16 @@ jobs:
         with:
           github-token: ${{ secrets.GHEC_ADMIN_TOKEN }}
           script: |
+            const createRepos = require('./.github/scripts/create-repos.js')
             const fs = require('fs')
-            const repositories = fs.readFileSync('./repositories.txt', 'utf8').split('\n')
 
             const options = {
               targetOrganization: '${{ vars.GHEC_TARGET_ORGANIZATION }}',
               targetRepositoryVisibility: '${{ steps.parse-issue-body.outputs.target-visibility }}',
-              repositories: repositories
+              repositories: fs.readFileSync('./repositories.txt', 'utf8').split('\n')
             }
 
-            await require('./.github/scripts/create-repos.js')({github, context, core, options})
+            await createRepos({github, context, core, options})
 
       - name: Clone from Bitbucket Cloud and push to GitHub Enterprise Cloud
         id: clone-and-push
@@ -127,13 +130,15 @@ jobs:
         with:
           github-token: ${{ secrets.GHEC_ADMIN_TOKEN }}
           script: |
+            const cloneRepos = require('./.github/scripts/clone-repos.js')
+
             const options = {
               targetOrganization: '${{ vars.GHEC_TARGET_ORGANIZATION }}',
               repositories: repositories,
               temp: '${{ runner.temp }}'
             }
 
-            await require('./.github/scripts/clone-repos.js')({github, context, core, options, exec})
+            await cloneRepos({github, context, core, options, exec})
 
       - if: ${{ failure() }}
         name: Update issue with failed migration
