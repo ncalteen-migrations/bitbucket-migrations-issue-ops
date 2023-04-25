@@ -122,7 +122,7 @@ jobs:
 
             const options = {
               targetOrganization: '${{ vars.GHEC_TARGET_ORGANIZATION }}',
-              targetRepositoryVisibility: '${{ steps.parse-issue-body.outputs.target-visibility }}',
+              targetRepositoryVisibility: '${{ steps.parse.outputs.target-visibility }}',
               repositories: fs.readFileSync('./repositories.txt', 'utf8').split(/[\r\n]+/)
             }
 
