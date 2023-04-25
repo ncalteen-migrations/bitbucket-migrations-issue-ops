@@ -4,7 +4,10 @@ module.exports = ({github, context, core, options}) => {
     /### Repositories[\r\n]+```CSV[\r\n]+(?<repositories>[^`]+)```[\r\n]+### Target repository visibility[\r\n]+(?<targetRepositoryVisibility>Private|Internal)/,
   )
 
+  console.log(parsedIssueBody)
+
   if (parsedIssueBody) {
+    console.log(parsedIssueBody.groups)
     const repositories = parsedIssueBody.groups.repositories
       .trim()
       .split(/[\r\n]+/)
