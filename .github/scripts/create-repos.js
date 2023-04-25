@@ -5,7 +5,10 @@ module.exports = async ({github, context, core, options}) => {
     await github.rest.repos.createInOrg({
       org: options.targetOrganization,
       name: repository.split(',')[1],
-      visibility: options.visibility === 'Private' ? 'private' : 'internal',
+      visibility:
+        options.targetRepositoryVisibility === 'Private'
+          ? 'private'
+          : 'internal',
     })
   })
 }

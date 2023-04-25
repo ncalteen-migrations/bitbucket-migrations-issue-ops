@@ -1,4 +1,4 @@
-name: Bitbucket Cloud Export
+name: Bitbucket Cloud Migration
 
 on:
   workflow_call:
@@ -20,9 +20,6 @@ jobs:
     if: |
       github.event_name == 'issue_comment' &&
       (startsWith(github.event.comment.body, '/run-dry-run-migration') || startsWith(github.event.comment.body, '/run-production-migration'))
-
-    env:
-      MIGRATION_GUID: ${{ inputs.migration-guid }}
 
     steps:
       - name: Check out repository
@@ -75,29 +72,42 @@ jobs:
           name: repositories
           path: repositories.txt
 
+      - if: ${{ failure() }}
+        name: Update issue with failed migration
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const body = `:no_entry: **Migration failed.** [View workflow run for details](${context.payload.repository.html_url}/actions/runs/${context.runId})`
+
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body
+            })
+
   import:
     name: Import
     needs: export
     runs-on: ubuntu-latest
 
     steps:
+      - name: Check out repository
+        uses: actions/checkout@v3
+
       - name: Download repository list
         uses: actions/download-artifact@v2
         with:
           name: repositories
           path: .
 
-      - name: Create empty repositories on GitHub
+      - name: Create empty repositories on GitHub Enterprise Cloud
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.GHEC_ADMIN_TOKEN }}
           script: |
             const fs = require('fs')
             const repositories = fs.readFileSync('./repositories.txt', 'utf8').split('\n')
-
-            console.log('-----------------')
-            console.log(repositories.join('-'))
-            console.log('-----------------')
 
             const options = {
               targetOrganization: '${{ vars.GHEC_TARGET_ORGANIZATION }}',
@@ -109,63 +119,47 @@ jobs:
 
       - name: Clone from Bitbucket Cloud and push to GitHub Enterprise Cloud
         id: clone-and-push
-        run: |
-          # Group cat and echo to avoid missing newline at the end
-          # Otherwise the last line in repositories.txt is ignored
-          { cat "./repositories.txt"; echo; } | while read line;
-          do
-            # Strip project name
-            repo=${line#*,}
+        uses: actions/github-script@v6
+        env:
+          BITBUCKET_CLOUD_WORKSPACE: ${{ vars.BITBUCKET_CLOUD_WORKSPACE }}
+          BITBUCKET_CLOUD_ADMIN_TOKEN:
+            ${{ secrets.BITBUCKET_CLOUD_ADMIN_TOKEN }}
+          GHEC_ADMIN_TOKEN: ${{ secrets.GHEC_ADMIN_TOKEN }}
+        with:
+          github-token: ${{ secrets.GHEC_ADMIN_TOKEN }}
+          script: |
+            const options = {
+              targetOrganization: '${{ vars.GHEC_TARGET_ORGANIZATION }}',
+              repositories: repositories,
+              temp: '${{ runner.temp }}'
+            }
 
-            echo "Cloning $repo..."
+            await require('./.github/scripts/clone-repos.js')({github, context, core, options, exec})
 
-            # Clone repository
-            mkdir -p /tmp/${{ env.MIGRATION_GUID }}
-            git clone "https://x-token-auth:${{ secrets.BITBUCKET_CLOUD_ADMIN_TOKEN }}@bitbucket.org/${{ vars.BITBUCKET_CLOUD_WORKSPACE }}/$repo.git" "/tmp/${{ env.MIGRATION_GUID }}/$repo"
+      - if: ${{ failure() }}
+        name: Update issue with failed migration
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const body = `:no_entry: **Migration failed.** [View workflow run for details](${context.payload.repository.html_url}/actions/runs/${context.runId})`
 
-            # Check for errors
-            ERROR_CODE=$?
-            if [ ${ERROR_CODE} -ne 0 ]; then
-              echo "::error::Failed to clone repository: $repo"
-              echo "step=clone" >> $GITHUB_OUTPUT
-              exit 1
-            else
-              echo "::debug::Successfuly cloned repository"
-            fi
-          done
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body
+            })
 
-      #- name: Update remote URL
-      #  uses: actions/upload-artifact@v3
-      #  with:
-      #    name: ${{ env.MIGRATION_GUID }}.tar.gz
-      #    path: ${{ github.workspace }}/${{ env.MIGRATION_GUID }}.tar.gz
-      #    if-no-files-found: error
-      #    retention-days: 1
+      - if: ${{ success() }}
+        name: Update issue with successful migration
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const body = `:white_check_mark: **Migration successful.** [View workflow run for details](${context.payload.repository.html_url}/actions/runs/${context.runId})`
 
-      #- if: ${{ failure() }}
-      #  name: Update issue with failed export
-      #  uses: actions/github-script@v6
-      #  with:
-      #    script: |
-      #      const body = `:no_entry: **Export failed.** [View workflow run for details](${context.payload.repository.html_url}/actions/runs/${context.runId})`
-
-      #      await github.rest.issues.createComment({
-      #        issue_number: context.issue.number,
-      #        owner: context.repo.owner,
-      #        repo: context.repo.repo,
-      #        body
-      #      })
-
-      #- if: ${{ success() }}
-      #  name: Update issue with successful export
-      #  uses: actions/github-script@v6
-      #  with:
-      #    script: |
-      #      const body = `:white_check_mark: **Export successful.** [View workflow run for details](${context.payload.repository.html_url}/actions/runs/${context.runId})`
-
-      #      await github.rest.issues.createComment({
-      #        issue_number: context.issue.number,
-      #        owner: context.repo.owner,
-      #        repo: context.repo.repo,
-      #        body
-      #      })
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body
+            })
