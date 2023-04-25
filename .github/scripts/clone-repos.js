@@ -22,14 +22,14 @@ module.exports = async ({github, context, core, options, exec}) => {
         // Push the source repository to the target repository
         exec
           .exec(`git push --mirror ${targetRepositoryUrl}`, [], {
-            cwd: `${options.temp}/${repo}`,
+            cwd: `${options.temp}/${repo}.git`,
           })
           .then(async () => {
             core.info(`Repository mirrored: ${repo}`)
 
             // Empty the temporary directory
-            exec.exec(`rm -rf .`, [], {
-              cwd: `${options.temp}/${repo}`,
+            exec.exec(`rm -rf ${repo}.git`, [], {
+              cwd: `${options.temp}`,
             })
           })
       })
