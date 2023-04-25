@@ -17,10 +17,12 @@ module.exports = async ({github, context, core, options}) => {
 
     body = `👋 Thank you for opening this migration issue!
   
-    The following **${repositories.length} repositories** have been parsed from your issue body:
+    The following **${
+      repositories.length
+    } repositories** have been parsed from your issue body:
   
     \`\`\`plain
-    ${repositories}
+    ${repositories.join('\n')}
     \`\`\`
   
     The **target organization** is set to: **\`${options.targetOrganization}\`**
