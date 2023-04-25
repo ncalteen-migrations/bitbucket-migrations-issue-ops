@@ -6,12 +6,12 @@ module.exports = async ({github, context, core, options}) => {
     core,
   })
 
-  let commentBody
+  let body
 
   if (repositories && targetRepositoryVisibility) {
     repositories = repositories.trim().split('\n')
 
-    commentBody = `👋 Thank you for opening this migration issue!
+    body = `👋 Thank you for opening this migration issue!
   
     The following **${repositories.length} repositories** have been parsed from your issue body:
   
@@ -52,13 +52,13 @@ module.exports = async ({github, context, core, options}) => {
     \`\`\`
     `
   } else {
-    commentBody = `😢 The issue body could not be parsed. Please edit the issue body or open a new issue using an issue template.`
+    core.setFailed('The issue body could not be parsed')
   }
 
   await github.rest.issues.createComment({
     issue_number: context.issue.number,
     owner: context.repo.owner,
     repo: context.repo.repo,
-    body: commentBody.replace(/  +/g, ''),
+    body: body,
   })
 }

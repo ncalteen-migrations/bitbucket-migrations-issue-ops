@@ -1,4 +1,4 @@
-name: Migration (Prepare)
+name: Prepare Migration
 
 on:
   issues:
@@ -8,7 +8,7 @@ on:
 
 jobs:
   prepare:
-    name: Prepare Migration
+    name: Prepare
     runs-on: ubuntu-latest
 
     if: |
@@ -24,21 +24,23 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
+            const prepare = require('./.github/scripts/prepare.js')
             const options = { targetOrganization: '${{ vars.GHEC_TARGET_ORGANIZATION }}' }
-            await require('./.github/scripts/prepare.js')({github, context, core, options})
+            await prepare({github, context, core, options})
 
       - name: Post failure message
         if: ${{ failure() }}
         uses: actions/github-script@v6
         with:
           script: |
-            let commentBody
+            const body = `😢 The issue body could not be parsed. Please edit the issue body or open a new issue using an issue template.
 
-            commentBody = `😢 The issue body could not be parsed. Please edit the issue body or open a new issue using an issue template.`
+            [View workflow run for details](${context.payload.repository.html_url}/actions/runs/${context.runId})
+            `
 
             await github.rest.issues.createComment({
               issue_number: ${{ github.event.issue.number }},
               owner: '${{ github.REPOSITORY_OWNER }}',
               repo: '${{ github.event.repository.name }}',
-              body: commentBody
+              body: body
             })
