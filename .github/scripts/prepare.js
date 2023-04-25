@@ -9,8 +9,6 @@ module.exports = async ({github, context, core, options}) => {
   let body
 
   if (repositories && targetRepositoryVisibility) {
-    //repositories = repositories.trim().split(/[\r\n]+/)
-
     body = `👋 Thank you for opening this migration issue!
   
     The following **${repositories.length} repositories** have been parsed from your issue body:
@@ -59,6 +57,6 @@ module.exports = async ({github, context, core, options}) => {
     issue_number: context.issue.number,
     owner: context.repo.owner,
     repo: context.repo.repo,
-    body: body,
+    body: body.replace(/  +/g, ''),
   })
 }
