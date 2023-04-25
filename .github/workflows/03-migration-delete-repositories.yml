@@ -1,4 +1,4 @@
-name: Migration (Delete repositories)
+name: Delete Repositories
 
 on:
   issue_comment:
