@@ -1,7 +1,7 @@
 const parseIssueBody = require('./parse-issue-body.js')
 
 module.exports = async ({github, context, core, options}) => {
-  const {repositories, targetRepositoryVisibility} = parseIssueBody({
+  let {repositories, targetRepositoryVisibility} = parseIssueBody({
     context,
     core,
   })
@@ -9,6 +9,12 @@ module.exports = async ({github, context, core, options}) => {
   let body
 
   if (repositories && targetRepositoryVisibility) {
+    repositories = repositories.trim().split(/[\r\n]+/)
+    targetRepositoryVisibility =
+      targetRepositoryVisibility === 'None'
+        ? 'Private'
+        : targetRepositoryVisibility
+
     body = `👋 Thank you for opening this migration issue!
   
     The following **${repositories.length} repositories** have been parsed from your issue body:
