@@ -15,8 +15,8 @@ jobs:
     #   - `migration` label present
     #   - `/run-dry-run-migration` or `/run-production-migration` comment added
     if: |
-      contains(toJson(github.event.*.labels.*.name), 'migration') &&
       contains(toJson(github.event.issue.labels.*.name), 'bitbucket-cloud') &&
+      contains(toJson(github.event.*.labels.*.name), 'migration') &&
       github.event_name == 'issue_comment' &&
       (startsWith(github.event.comment.body, '/run-dry-run-migration') || startsWith(github.event.comment.body, '/run-production-migration'))
 
@@ -38,16 +38,14 @@ jobs:
             })
 
       - name: Parse repositories from issue body
-        id: parse-issue-body
+        id: parse
         uses: actions/github-script@v6
         with:
           script: |
             const fs = require('fs')
             const parse = require('./.github/scripts/parse-issue-body.js')
 
-            const options = {
-              targetOrganization: '${{ vars.GHEC_TARGET_ORGANIZATION }}'
-            }
+            const options = {}
             const parsedIssueBody = parse({github, context, core, options})
 
             fs.writeFileSync('./repositories.txt', parsedIssueBody.repositories.trim())
@@ -61,9 +59,10 @@ jobs:
           github-token: ${{ secrets.GHEC_ADMIN_TOKEN }}
           script: |
             const checkExistingRepos = require('./.github/scripts/check-existing-repos.js')
+
             const options = {
               targetOrganization: '${{ vars.GHEC_TARGET_ORGANIZATION }}',
-              repositories: ${{ steps.parse-issue-body.outputs.repositories-json }}
+              repositories: ${{ steps.parse.outputs.repositories-json }}
             }
 
             await checkExistingRepos({github, context, core, options})
@@ -71,8 +70,10 @@ jobs:
       - name: Upload repositories artifact
         uses: actions/upload-artifact@v3
         with:
-          name: repositories
+          name: repositories.txt
           path: repositories.txt
+          if-no-files-found: error
+          retention-days: 1
 
       - if: ${{ failure() }}
         name: Update issue with failed migration
@@ -97,10 +98,18 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v3
 
+      - name: Set migration type
+        id: migration-type
+        uses: actions/github-script@v6
+        with:
+          result-encoding: string
+          script: |
+            return context.payload.comment.body.match('dry-run') ? 'Dry-run' : 'Production'
+
       - name: Download repository list
         uses: actions/download-artifact@v2
         with:
-          name: repositories
+          name: repositories.txt
           path: .
 
       - name: Create empty repositories on GitHub Enterprise Cloud
@@ -159,7 +168,19 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
-            const body = `:white_check_mark: **Migration successful.** [View workflow run for details](${context.payload.repository.html_url}/actions/runs/${context.runId})`
+            const migrationType = '${{ steps.migration-type.outputs.result }}'
+
+            let body = `:white_check_mark: **Migration successful.** [View workflow run for details](${context.payload.repository.html_url}/actions/runs/${context.runId})`
+
+            if (migrationType === 'Dry-run') {
+              body = `:white_check_mark: **Migration successful.** [View workflow run for details](${context.payload.repository.html_url}/actions/runs/${context.runId})
+              
+              In order to delete the migrated repositories from the dry-run, add a comment with the following slash command:
+
+              \`\`\`plain
+              /delete-repositories
+              \`\`\``
+            }
 
             await github.rest.issues.createComment({
               issue_number: context.issue.number,

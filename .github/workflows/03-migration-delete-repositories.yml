@@ -5,13 +5,14 @@ on:
     types: [created]
 
 jobs:
-  delete-repositories:
-    name: Delete repositories
+  delete-bitbucket-server:
+    name: Delete repositories migrated from Bitbucket Server
     runs-on: ubuntu-latest
 
     if: |
       github.event_name == 'issue_comment' &&
-      startsWith(github.event.comment.body, '/delete-repositories')
+      startsWith(github.event.comment.body, '/delete-repositories') &&
+      contains(toJson(github.event.issue.labels.*.name), 'bitbucket-server')
 
     defaults:
       run:
@@ -36,7 +37,7 @@ jobs:
             const match = context.payload.comment.body.trim().match(regex)
 
             if (match) {
-              console.log('migration-guid', match[1])
+              core.info('migration-guid', match[1])
               return match[1]
             }
 
@@ -64,3 +65,43 @@ jobs:
           # Terminate process with non-zero exit code if file system operations
           # fail (https://nodejs.org/api/cli.html#cli_unhandled_rejections_mode)
           NODE_OPTIONS: --unhandled-rejections=strict
+
+  delete-bitbucket-cloud:
+    name: Delete repositories migrated from Bitbucket Cloud
+    runs-on: ubuntu-latest
+
+    if: |
+      github.event_name == 'issue_comment' &&
+      startsWith(github.event.comment.body, '/delete-repositories') &&
+      contains(toJson(github.event.issue.labels.*.name), 'bitbucket-cloud')
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v3
+
+      - name: Parse repositories from issue body
+        id: parse
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs')
+            const parse = require('./.github/scripts/parse-issue-body.js')
+
+            const options = {}
+            const parsedIssueBody = parse({github, context, core, options})
+
+            fs.writeFileSync('./repositories.txt', parsedIssueBody.repositories.trim())
+
+      - name: Delete repositories
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GHEC_ADMIN_TOKEN }}
+          script: |
+            const deleteRepos = require('./.github/scripts/delete-repos.js')
+
+            const options = {
+              targetOrganization: '${{ vars.GHEC_TARGET_ORGANIZATION }}',
+              repositories: ${{ steps.parse.outputs.repositories-json }}
+            }
+
+            await deleteRepos({github, context, core, options})

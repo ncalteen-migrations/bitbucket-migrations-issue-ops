@@ -1,5 +1,3 @@
-const fs = require('fs')
-
 module.exports = async ({github, context, core, options}) => {
   options.repositories.forEach(async repository => {
     await github.rest.repos.createInOrg({
