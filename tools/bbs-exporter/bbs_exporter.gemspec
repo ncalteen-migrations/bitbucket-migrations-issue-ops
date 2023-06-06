@@ -32,7 +32,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency "faraday",            "~> 1.8.0"
   spec.add_dependency "faraday-http-cache", "~> 2.2.0"
   spec.add_dependency "faraday_middleware", "~> 1.2.0"
-  spec.add_dependency "git",                "~> 1.6.0"
+  spec.add_dependency "git",                ">= 1.6", "< 1.19"
   spec.add_dependency "mime-types",         "~> 3.3.1"
   spec.add_dependency "posix-spawn",        "~> 0.3.13"
   spec.add_dependency "ruby-progressbar",   "~> 1.10.1"
